@@ -1,0 +1,11 @@
+C:\Users\Piotr Langer\Documents\GlaiveOnline\Server\GlaiveServer\GlaiveServer\bin\Debug\netcoreapp2.1\GlaiveServer.deps.json
+C:\Users\Piotr Langer\Documents\GlaiveOnline\Server\GlaiveServer\GlaiveServer\bin\Debug\netcoreapp2.1\GlaiveServer.runtimeconfig.json
+C:\Users\Piotr Langer\Documents\GlaiveOnline\Server\GlaiveServer\GlaiveServer\bin\Debug\netcoreapp2.1\GlaiveServer.runtimeconfig.dev.json
+C:\Users\Piotr Langer\Documents\GlaiveOnline\Server\GlaiveServer\GlaiveServer\bin\Debug\netcoreapp2.1\GlaiveServer.dll
+C:\Users\Piotr Langer\Documents\GlaiveOnline\Server\GlaiveServer\GlaiveServer\obj\Debug\netcoreapp2.1\GlaiveServer.csprojAssemblyReference.cache
+C:\Users\Piotr Langer\Documents\GlaiveOnline\Server\GlaiveServer\GlaiveServer\obj\Debug\netcoreapp2.1\GlaiveServer.csproj.CoreCompileInputs.cache
+C:\Users\Piotr Langer\Documents\GlaiveOnline\Server\GlaiveServer\GlaiveServer\obj\Debug\netcoreapp2.1\GlaiveServer.AssemblyInfoInputs.cache
+C:\Users\Piotr Langer\Documents\GlaiveOnline\Server\GlaiveServer\GlaiveServer\obj\Debug\netcoreapp2.1\GlaiveServer.AssemblyInfo.cs
+C:\Users\Piotr Langer\Documents\GlaiveOnline\Server\GlaiveServer\GlaiveServer\bin\Debug\netcoreapp2.1\GlaiveServer.pdb
+C:\Users\Piotr Langer\Documents\GlaiveOnline\Server\GlaiveServer\GlaiveServer\obj\Debug\netcoreapp2.1\GlaiveServer.dll
+C:\Users\Piotr Langer\Documents\GlaiveOnline\Server\GlaiveServer\GlaiveServer\obj\Debug\netcoreapp2.1\GlaiveServer.pdb
