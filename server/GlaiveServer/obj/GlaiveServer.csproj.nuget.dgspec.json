@@ -46,6 +46,10 @@
               "version": "[2.1.0, )",
               "autoReferenced": true
             },
+            "MySql.Data": {
+              "target": "Package",
+              "version": "[8.0.19, )"
+            },
             "WebSocketSharp-netstandard": {
               "target": "Package",
               "version": "[1.0.1, )"

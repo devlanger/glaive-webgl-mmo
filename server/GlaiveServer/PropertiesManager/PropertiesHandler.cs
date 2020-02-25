@@ -11,7 +11,6 @@ namespace GameCoreEngine
 
         private void InvokePropertyChange(TId key, object value)
         {
-            Console.WriteLine(key + ":" + value);
             if (events.ContainsKey(key))
             {
                 foreach (var item in events[key])

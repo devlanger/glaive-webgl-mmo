@@ -21,6 +21,7 @@ namespace GameCoreEngine
         MAX_EXPERIENCE = 14,
         INT = 15,
         STATPOINTS = 16,
+        EXP_REWARD = 16,
     }
 
     public enum ObjectType : byte

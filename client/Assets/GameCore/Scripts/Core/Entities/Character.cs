@@ -40,13 +40,15 @@ namespace GameCoreEngine
 
             if(Moving)
             {
-                if(Vector3.Distance(transform.position, destination) > 0.5f)
+                if(Utils.FlatDistance(transform.position, destination) > 0.5f)
                 {
                     MoveTowards(destination);
                 }
                 else
                 {
                     Moving = false;
+                    model.animator.SetTrigger("walk");
+                    model.animator.SetInteger("walk_id", 0);
                 }
             }
         }
@@ -70,6 +72,12 @@ namespace GameCoreEngine
 
         public void SetDestination(Vector3 destination)
         {
+            if (!Moving)
+            {
+                model.animator.SetTrigger("walk");
+                model.animator.SetInteger("walk_id", 1);
+            }
+
             this.destination = destination;
             LookAt(destination);
             Moving = true;

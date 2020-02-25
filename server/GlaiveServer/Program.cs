@@ -9,6 +9,8 @@ namespace GlaiveServer
     {
         public static void Main(string[] args)
         {
+            DatabaseUtils.Initialize();
+            BaseMobsManager mobs = new BaseMobsManager();
             ZonesManager zones = new ZonesManager();
             ServerInstance server = new ServerInstance().Start("0.0.0.0", 2700);
         }
