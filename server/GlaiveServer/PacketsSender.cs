@@ -1,4 +1,5 @@
-﻿using System;
+﻿using GameCoreEngine;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
@@ -81,6 +82,32 @@ namespace GlaiveServer
 
             write.Write((byte)2);
             write.Write(id);
+            byte[] d = GetBytes();
+            target.SendData(d);
+            Clear(stream);
+        }
+
+        public static void SendStat(User target, int targetId, ObjectStats stat, ObjectType type, object value)
+        {
+            BinaryWriter write = GetWriter();
+
+            write.Write((byte)5);
+            write.Write(targetId);
+            write.Write((byte)stat);
+            write.Write((byte)type);
+            switch(type)
+            {
+                case ObjectType.INT:
+                    write.Write((int)value);
+                    break;
+                case ObjectType.UINT:
+                    write.Write((uint)value);
+                    break;
+                case ObjectType.USHORT:
+                    write.Write((ushort)value);
+                    break;
+            }
+
             byte[] d = GetBytes();
             target.SendData(d);
             Clear(stream);

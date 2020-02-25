@@ -1,4 +1,5 @@
-﻿using System;
+﻿using GameCoreEngine;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -23,7 +24,10 @@ namespace GlaiveServer
 
         public Character target;
         public float lastAttackTime;
-        private int health = 100;
+
+        public Character()
+        {
+        }
 
         public List<Character> GetObservedCharacters()
         {
@@ -67,13 +71,29 @@ namespace GlaiveServer
             if (target != null && Time.time >= lastAttackTime + 0.5f)
             {
                 target.Hit(25);
+                uint exp = CharactersManager.Stats.GetProperty<uint>(id, ObjectStats.EXPERIENCE);
+
+                if (exp + 100 >= 300)
+                {
+                    CharactersManager.Stats.SetProperty<uint>(id, ObjectStats.EXPERIENCE, 0);
+                    ushort lvl = CharactersManager.Stats.GetProperty<ushort>(id, ObjectStats.LVL);
+                    ushort stats = CharactersManager.Stats.GetProperty<ushort>(id, ObjectStats.STATPOINTS);
+                    CharactersManager.Stats.SetProperty<ushort>(id, ObjectStats.LVL, (ushort)(lvl + 1));
+                    CharactersManager.Stats.SetProperty<ushort>(id, ObjectStats.STATPOINTS, (ushort)(stats + 3));
+                }
+                else
+                {
+                    CharactersManager.Stats.SetProperty<uint>(id, ObjectStats.EXPERIENCE, (uint)(exp + 100));
+                }
+
                 lastAttackTime = Time.time;
             }
         }
 
         private void Hit(int v)
         {
-            health -= v;
+            int health = CharactersManager.Stats.GetProperty<int>(id, ObjectStats.HP);
+            CharactersManager.Stats.SetProperty<int>(id, ObjectStats.HP, health - 25);
             if(health <= 0)
             {
                 CharactersManager.RemoveCharacter(id);

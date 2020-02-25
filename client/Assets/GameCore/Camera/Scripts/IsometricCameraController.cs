@@ -20,6 +20,11 @@ namespace GameCoreEngine
 
         private void LateUpdate()
         {
+            if(target == null)
+            {
+                return;
+            }
+
             transform.position = target.transform.position - initialOffset;
         }
 

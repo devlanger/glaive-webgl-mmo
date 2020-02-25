@@ -1,4 +1,5 @@
-﻿using GlaiveServer;
+﻿using GameCoreEngine;
+using GlaiveServer;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -6,6 +7,7 @@ using System.Collections.Generic;
 public class CharactersManager
 {
     public static Dictionary<int, Character> characters = new Dictionary<int, Character>();
+    public static PropertiesManager<int, ObjectStats> Stats = new PropertiesManager<int, ObjectStats>();
 
     private static int id = 1;
 
@@ -27,6 +29,17 @@ public class CharactersManager
     {
         Character c = new Character();
         c.id = GetId();
+
+        Stats.RegisterChange(c.id, ObjectStats.HP, (val) =>
+        {
+            foreach (var item in c.GetObservedUsers())
+            {
+                PacketsSender.SendStat(item, c.id, ObjectStats.HP, ObjectType.INT, val);
+            }
+        });
+
+        Stats.SetProperty(c.id, ObjectStats.HP, (int)100);
+        Stats.SetProperty(c.id, ObjectStats.MAX_HP, (int)100);
         characters.Add(c.id, c);
 
         return c;
@@ -35,6 +48,7 @@ public class CharactersManager
     public static void RemoveCharacter(int id)
     {
         characters.Remove(id);
+        Stats.RemoveStats(id);
     }
 
     public static int GetId()

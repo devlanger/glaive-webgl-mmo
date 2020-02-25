@@ -1,6 +1,5 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
 
 namespace GameCoreEngine
 {
@@ -28,6 +27,6 @@ namespace GameCoreEngine
     {
         UINT = 1,
         USHORT = 2,
-        INT = 3,
+        INT = 3
     }
 }

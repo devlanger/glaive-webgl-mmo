@@ -17,23 +17,21 @@ namespace GameCoreEngine
         {
             base.Start();
 
-            GameCore.Stats.SetProperty<short>(Id, ObjectStats.HP, 100);
-            GameCore.Stats.RegisterChange(Id, ObjectStats.HP, (v) =>
+            /*GameCore.Stats.RegisterChange(Id, ObjectStats.HP, (v) =>
             {
                 if(IsDead)
                 {
                     return;
                 }
 
-                short health = (short)v;
-                Debug.Log(Id + " | HEALTH: " + health);
+                int health = (int)v;
                 if (health <= 0)
                 {
                     IsDead = true;
                     GameCore.Stats.RemoveStats(Id);
                     StartCoroutine(Die());
                 }
-            });
+            });*/
         }
 
         protected override void FixedUpdate()

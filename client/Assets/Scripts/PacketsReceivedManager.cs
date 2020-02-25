@@ -13,6 +13,7 @@ public class PacketsReceivedManager : MonoBehaviour
         { 1, MoveCharacter },
         { 2, DespawnCharacter },
         { 4, ControlCharacter },
+        { 5, ReceiveStat },
     };
 
     private delegate void PacketReceivedAction(BinaryReader reader);
@@ -59,6 +60,34 @@ public class PacketsReceivedManager : MonoBehaviour
         }
 
         PacketsSender.Clear(memoryStream);
+    }
+    private static void ReceiveStat(BinaryReader reader)
+    {
+        int id = reader.ReadInt32();
+        ObjectStats stat = (ObjectStats)reader.ReadByte();
+        ObjectType type = (ObjectType)reader.ReadByte();
+        object value;
+
+        switch (type)
+        {
+            case ObjectType.INT:
+                value = reader.ReadInt32();
+                break;
+            case ObjectType.UINT:
+                value = reader.ReadUInt32();
+                break;
+            case ObjectType.USHORT:
+                value = reader.ReadUInt16();
+                break;
+            default:
+                value = 0;
+                break;
+        }
+
+        UnityMainThreadDispatcher.Instance().Enqueue(() =>
+        {
+            GameCore.Stats.SetProperty(id, stat, value);
+        });
     }
 
     private static void SpawnCharacter(BinaryReader reader)

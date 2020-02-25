@@ -14,6 +14,9 @@ public class CharactersManager : Singleton<CharactersManager>
     [SerializeField]
     private GameObject[] models;
 
+    public event Action<int, Character> OnCharacterAdded = delegate { };
+    public event Action<int> OnCharacterRemoved = delegate { };
+
     private void Awake()
     {
         foreach (var item in FindObjectsOfType<Character>())
@@ -45,6 +48,7 @@ public class CharactersManager : Singleton<CharactersManager>
         else
         {
             characters.Add(id, c);
+            OnCharacterAdded(id, c);
             return true;
         }
     }
@@ -81,5 +85,6 @@ public class CharactersManager : Singleton<CharactersManager>
         }
 
         characters.Remove(id);
+        OnCharacterRemoved(id);
     }
 }

@@ -1,4 +1,5 @@
-﻿using GlaiveServer;
+﻿using GameCoreEngine;
+using GlaiveServer;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -10,7 +11,33 @@ public static class PacketsReceivedManager
     {
         { 0, Test },
         { 1, CombatStatePacket },
+        { 2, AddStatPacket },
     };
+
+    private static void AddStatPacket(User user, BinaryReader reader)
+    {
+        byte stat = reader.ReadByte();
+
+        if(Enum.IsDefined(typeof(ObjectStats), (byte)stat))
+        {
+            ObjectStats s = (ObjectStats)stat;
+            switch (s)
+            {
+                case ObjectStats.STR:
+                case ObjectStats.INT:
+                case ObjectStats.DEX:
+                case ObjectStats.VIT:
+                    ushort statPoints = CharactersManager.Stats.GetProperty<ushort>(user.Character.id, ObjectStats.STATPOINTS);
+                    if (statPoints > 0)
+                    {
+                        ushort value = CharactersManager.Stats.GetProperty<ushort>(user.Character.id, s);
+                        CharactersManager.Stats.SetProperty<ushort>(user.Character.id, s, (ushort)(value + 1));
+                        CharactersManager.Stats.SetProperty<ushort>(user.Character.id, ObjectStats.STATPOINTS, (ushort)(statPoints - 1));
+                    }
+                    break;
+            }
+        }
+    }
 
     private delegate void PacketReceivedAction(User user, BinaryReader reader);
 

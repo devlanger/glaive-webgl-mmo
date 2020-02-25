@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using GameCoreEngine;
 using UnityEngine;
 
 public static class PacketsSender
@@ -45,7 +46,18 @@ public static class PacketsSender
             Clear(stream);
         }
 
-        public static void AttackTarget(int id)
+    internal static void AddStat(ObjectStats stat)
+    {
+        BinaryWriter write = GetWriter();
+
+        write.Write((byte)2);
+        write.Write((byte)stat);
+        byte[] d = GetBytes();
+        WebSocketDemo.Instance.SendData(d);
+        Clear(stream);
+    }
+
+    public static void AttackTarget(int id)
         {
             BinaryWriter write = GetWriter();
 

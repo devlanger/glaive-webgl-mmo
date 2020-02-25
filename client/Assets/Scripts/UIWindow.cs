@@ -4,22 +4,50 @@ using UnityEngine;
 
 public class UIWindow : MonoBehaviour
 {
+    private Canvas canvas;
+
     public bool IsHidden
     {
         get
         {
-            return gameObject.activeInHierarchy;
+            if (canvas == null)
+            {
+                return gameObject.activeInHierarchy;
+            }
+            else
+            {
+                return canvas.enabled;
+            }
         }
+    }
+
+    private void Awake()
+    {
+        canvas = GetComponent<Canvas>();
     }
 
     public void Hide()
     {
-        gameObject.SetActive(false);
+        if (canvas == null)
+        {
+            gameObject.SetActive(false);
+        }
+        else
+        {
+            canvas.enabled = false;
+        }
     }
 
     public void Show()
     {
-        gameObject.SetActive(true);
+        if (canvas == null)
+        {
+            gameObject.SetActive(true);
+        }
+        else
+        {
+            canvas.enabled = true;
+        }
     }
 
     public void Toggle()

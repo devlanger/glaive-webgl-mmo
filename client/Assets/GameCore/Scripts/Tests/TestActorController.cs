@@ -1,5 +1,7 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 namespace GameCoreEngine
 {
@@ -17,17 +19,20 @@ namespace GameCoreEngine
         [SerializeField]
         private ParticleAttractor expParticle;
 
+        public Actor Actor { get => actor; }
+
+        public event Action<Character> OnPlayerInitialized = delegate { };
+
         private void Start()
         {
             //GameCore.Stats.SetPropertyString(actor.Id, ObjectStats.ATT_POWER, "LOL");
             //GameCore.Stats.SetPropertyByte(actor.Id, ObjectStats.LVL, 99);
-            targetPoint = actor.transform.position;
         }
 
         private void Update()
         {
             Ray r = Camera.main.ScreenPointToRay(Input.mousePosition);
-            if (Physics.Raycast(r, out RaycastHit hit))
+            if (!EventSystem.current.IsPointerOverGameObject() && Physics.Raycast(r, out RaycastHit hit))
             {
                 if (Input.GetMouseButtonDown(0))
                 {
@@ -35,7 +40,7 @@ namespace GameCoreEngine
 
                     if (hit.collider != null)
                     {
-                        if (a && a != actor)
+                        if (a && a != Actor)
                         {
                             if (target == null)
                             {
@@ -67,12 +72,6 @@ namespace GameCoreEngine
 
             }
 
-            if (Vector3.Distance(targetPoint, actor.transform.position) > 0.2f)
-            {
-                //actor.MoveTowards(targetPoint);
-                //actor.LookAt(targetPoint);
-            }
-
             if (interactWithTarget)
             {
                 if (target)
@@ -90,7 +89,7 @@ namespace GameCoreEngine
 
         private Vector3 ToTargetVector()
         {
-            return (actor.transform.position - target.transform.position).normalized;
+            return (Actor.transform.position - target.transform.position).normalized;
         }
 
         private void ReleaseTarget()
@@ -111,14 +110,14 @@ namespace GameCoreEngine
             bool attacking = false;
             while (target && !target.IsDead)
             {
-                if (Vector3.Distance(target.transform.position, actor.transform.position) > 2)
+                if (Vector3.Distance(target.transform.position, Actor.transform.position) > 2)
                 {
                     yield return new WaitForSeconds(0.1f);
                 }
                 else
                 {
-                    actor.model.animator.SetTrigger("attack");
-                    actor.model.animator.SetInteger("attack_id", 1);
+                    Actor.model.animator.SetTrigger("attack");
+                    Actor.model.animator.SetInteger("attack_id", 1);
 
                     if (!attacking)
                     {
@@ -126,18 +125,15 @@ namespace GameCoreEngine
                         attacking = true;
                     }
 
-                    //short hp = GameCore.Stats.GetProperty<short>(target.Id, ObjectStats.HP);
-                    //GameCore.Stats.SetProperty<short>(target.Id, ObjectStats.HP, (short)(hp - (short)25));
-
                     if (target.IsDead)
                     {
                         ParticleAttractor attr = Instantiate(expParticle, target.transform.position + Vector3.up, Quaternion.identity);
-                        attr.SetTarget(actor.transform);
+                        attr.SetTarget(Actor.transform);
                         Destroy(attr.gameObject, 0.9f);
                     }
-                    yield return new WaitForSeconds(1);
-                    actor.model.animator.SetTrigger("attack");
-                    actor.model.animator.SetInteger("attack_id", 0);
+                    yield return new WaitForSeconds(0.5f);
+                    Actor.model.animator.SetTrigger("attack");
+                    Actor.model.animator.SetInteger("attack_id", 0);
                 }
             }
         }
@@ -146,6 +142,8 @@ namespace GameCoreEngine
         {
             this.actor = (Character)actor;
             FindObjectOfType<IsometricCameraController>().SetTarget(actor);
+
+            OnPlayerInitialized((Character)actor);
         }
 
         public void SetTarget(Actor actor)
