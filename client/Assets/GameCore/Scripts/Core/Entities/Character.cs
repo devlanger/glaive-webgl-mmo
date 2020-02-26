@@ -62,6 +62,8 @@ namespace GameCoreEngine
 
         public virtual void Attack(Transform target)
         {
+            model.animator.SetTrigger("attack");
+            model.animator.SetInteger("attack_id", 1);
         }
 
         public void SetModel(ActorModel actorModel)

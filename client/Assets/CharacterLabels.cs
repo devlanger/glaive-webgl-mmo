@@ -15,19 +15,22 @@ public class CharacterLabels : MonoBehaviour
         CharactersManager.Instance.OnCharacterRemoved += Instance_OnCharacterRemoved;
     }
 
-    private void Instance_OnCharacterRemoved(int obj)
+    private void Instance_OnCharacterRemoved(int id)
     {
-        if (labels[obj].gameObject != null)
+        if (labels.ContainsKey(id))
         {
-            Destroy(labels[obj].gameObject);
+            if (labels[id].gameObject != null)
+            {
+                Destroy(labels[id].gameObject);
+            }
+            labels.Remove(id);
         }
-        labels.Remove(obj);
     }
 
     private void Instance_OnCharacterAdded(int arg1, GameCoreEngine.Character arg2)
     {
         CharacterLabel labelInst = CharacterLabel.Instantiate(label, transform);
         labelInst.Fill(arg2);
-        labels.Add(arg1, labelInst);
+        labels.Add(arg2.Id, labelInst);
     }
 }

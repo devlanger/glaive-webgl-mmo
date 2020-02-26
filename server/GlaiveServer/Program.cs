@@ -11,6 +11,7 @@ namespace GlaiveServer
         {
             DatabaseUtils.Initialize();
             BaseMobsManager mobs = new BaseMobsManager();
+            CharacterRespawner respawn = new CharacterRespawner();
             ZonesManager zones = new ZonesManager();
             ServerInstance server = new ServerInstance().Start("0.0.0.0", 2700);
         }

@@ -14,7 +14,9 @@ public class PacketsReceivedManager : MonoBehaviour
         { 2, DespawnCharacter },
         { 4, ControlCharacter },
         { 5, ReceiveStat },
+        { 6, ReceiveAttack },
     };
+
 
     private delegate void PacketReceivedAction(BinaryReader reader);
     private static MemoryStream memoryStream;
@@ -87,6 +89,19 @@ public class PacketsReceivedManager : MonoBehaviour
         UnityMainThreadDispatcher.Instance().Enqueue(() =>
         {
             GameCore.Stats.SetProperty(id, stat, value);
+        });
+    }
+
+    private static void ReceiveAttack(BinaryReader reader)
+    {
+        int attackerId = reader.ReadInt32();
+
+        UnityMainThreadDispatcher.Instance().Enqueue(() =>
+        {
+            if (CharactersManager.Instance.GetCharacter(attackerId, out GameCoreEngine.Character c))
+            {
+                c.Attack(null);
+            }
         });
     }
 

@@ -87,6 +87,17 @@ namespace GlaiveServer
             Clear(stream);
         }
 
+        public static void SendAttackAnimation(User target, Character character)
+        {
+            BinaryWriter write = GetWriter();
+
+            write.Write((byte)6);
+            write.Write(character.id);
+            byte[] d = GetBytes();
+            target.SendData(d);
+            Clear(stream);
+        }
+
         public static void SendStat(User target, int targetId, ObjectStats stat, ObjectType type, object value)
         {
             BinaryWriter write = GetWriter();

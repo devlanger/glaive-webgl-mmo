@@ -15,6 +15,14 @@ namespace GameCoreEngine
             props.RegisterChange(propertyKey, a);
         }
 
+        public void UnregisterChange(TId objectId, TId2 propertyKey, Action<object> a)
+        {
+            if (properties.GetProperty(objectId, out PropertiesHandler<TId2> property))
+            {
+                property.UnregisterChange(propertyKey, a);
+            }
+        }
+
         public void RemoveStats(TId objectId)
         {
             properties.values.Remove(objectId);

@@ -34,6 +34,7 @@ namespace GlaiveServer
 
             Character.OnObserveCharacter += Character_OnObserveCharacter;
             Character.OnUnobserveCharacter += Character_OnUnobserveCharacter;
+            Character.OnAttack += Character_OnAttack;
             CharactersManager.Stats.SetProperty<uint>(Character.id, ObjectStats.MAX_EXPERIENCE, 300);
             CharactersManager.Stats.SetProperty<ushort>(Character.id, ObjectStats.LVL, 1);
             RegisterEventHandlers();
@@ -43,6 +44,16 @@ namespace GlaiveServer
                 baseId = 1
             });
             PacketsSender.ControlCharacter(this, Character.id);
+        }
+
+        private void Character_OnAttack(Character target)
+        {
+            foreach (var item in Character.GetObservedUsers())
+            {
+                PacketsSender.SendAttackAnimation(item, Character);
+            }
+
+            PacketsSender.SendAttackAnimation(this, Character);
         }
 
         private void RegisterEventHandlers()

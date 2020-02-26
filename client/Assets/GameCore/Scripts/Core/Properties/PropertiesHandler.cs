@@ -8,11 +8,12 @@ namespace GameCoreEngine
     public class PropertiesHandler<TId>
     {
         private PropertiesDictionary<TId, object> objectValues = new PropertiesDictionary<TId, object>();
+
         /*private PropertiesDictionary<TId, byte> byteValues = new PropertiesDictionary<TId, byte>();
-        private PropertiesDictionary<TId, int> intValues = new PropertiesDictionary<TId, int>();
-        private PropertiesDictionary<TId, float> floatValues = new PropertiesDictionary<TId, float>();
-        private PropertiesDictionary<TId, string> stringValues = new PropertiesDictionary<TId, string>();
-        private PropertiesDictionary<TId, short> shortValues = new PropertiesDictionary<TId, short>();*/
+private PropertiesDictionary<TId, int> intValues = new PropertiesDictionary<TId, int>();
+private PropertiesDictionary<TId, float> floatValues = new PropertiesDictionary<TId, float>();
+private PropertiesDictionary<TId, string> stringValues = new PropertiesDictionary<TId, string>();
+private PropertiesDictionary<TId, short> shortValues = new PropertiesDictionary<TId, short>();*/
 
         private Dictionary<TId, List<Action<object>>> events = new Dictionary<TId, List<Action<object>>>();
 
@@ -42,6 +43,20 @@ namespace GameCoreEngine
 
             events[propertyKey].Add(a);
         }
+
+        public void UnregisterChange(TId propertyKey, Action<object> a)
+        {
+            if (!events.ContainsKey(propertyKey))
+            {
+                return;
+            }
+
+            if(events[propertyKey].Contains(a))
+            {
+                events[propertyKey].Remove(a);
+            }
+        }
+
 
         /*public void SetPropertyString(TId key, string value)
         {

@@ -36,6 +36,8 @@ namespace GlaiveServer
                 {
                     item.Value.Update();
                 }
+
+                CharacterRespawner.Instance.Update();
             }
             Console.ReadKey(true);
             wssv.Stop();

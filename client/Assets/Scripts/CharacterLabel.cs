@@ -17,23 +17,31 @@ public class CharacterLabel : MonoBehaviour
 
     private void LateUpdate()
     {
+        if(target == null)
+        {
+            Destroy(gameObject);
+            return;
+        }
+
         Vector3 pos = Camera.main.WorldToScreenPoint(target.transform.position + (Vector3.up * 2));
         transform.position = pos;
+    }
+
+    private void OnDestroy()
+    {
+        GameCore.Stats.UnregisterChange(target.Id, ObjectStats.HP, OnHealthChanged);
     }
 
     public void Fill(Character arg2)
     {
         target = arg2;
         nameText.text = arg2.name;
-        GameCore.Stats.RegisterChange(target.Id, ObjectStats.HP, (v) =>
-        {
-            int health = (int)v;
-            if (health <= 0)
-            {
-                Destroy(gameObject);
-                return;
-            }
-            fill.fillAmount = (float)health / 100f;
-        });
+        GameCore.Stats.RegisterChange(target.Id, ObjectStats.HP, OnHealthChanged);
+    }
+
+    private void OnHealthChanged(object v)
+    {
+        int health = (int)v;
+        fill.fillAmount = (float)health / 100f;
     }
 }

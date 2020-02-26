@@ -7,7 +7,7 @@ using System.Text;
 
 namespace GlaiveServer
 {
-    public class Character
+    public class Character : IObservable
     {
         public int id;
 
@@ -15,15 +15,19 @@ namespace GlaiveServer
 
         public double DestinationTimeChange { get; set; }
         public Vector2UInt16 Destination { get; set; }
+        public bool Hidden { get; set; }
 
         private HashSet<int> observedCharacters = new HashSet<int>();
         public ushort baseId;
 
         public event Action<int> OnObserveCharacter = delegate { };
         public event Action<int> OnUnobserveCharacter = delegate { };
-
+        public event Action<Character> OnAttack = delegate { };
+        
         public Character target;
         public float lastAttackTime;
+
+
 
         public Character()
         {
@@ -70,33 +74,43 @@ namespace GlaiveServer
         {
             if (target != null && Time.time >= lastAttackTime + 0.5f)
             {
+                OnAttack(target);
                 target.Hit(25);
-                uint exp = CharactersManager.Stats.GetProperty<uint>(id, ObjectStats.EXPERIENCE);
-
-                if (exp + 100 >= 300)
+                if (target.Hidden)
                 {
-                    CharactersManager.Stats.SetProperty<uint>(id, ObjectStats.EXPERIENCE, 0);
-                    ushort lvl = CharactersManager.Stats.GetProperty<ushort>(id, ObjectStats.LVL);
-                    ushort stats = CharactersManager.Stats.GetProperty<ushort>(id, ObjectStats.STATPOINTS);
-                    CharactersManager.Stats.SetProperty<ushort>(id, ObjectStats.LVL, (ushort)(lvl + 1));
-                    CharactersManager.Stats.SetProperty<ushort>(id, ObjectStats.STATPOINTS, (ushort)(stats + 3));
-                }
-                else
-                {
-                    CharactersManager.Stats.SetProperty<uint>(id, ObjectStats.EXPERIENCE, (uint)(exp + 100));
+                    AddExperience(100);
                 }
 
                 lastAttackTime = Time.time;
             }
         }
 
-        private void Hit(int v)
+        private void AddExperience(int amount)
+        {
+            uint exp = CharactersManager.Stats.GetProperty<uint>(id, ObjectStats.EXPERIENCE);
+
+            if (exp + amount >= 300)
+            {
+                CharactersManager.Stats.SetProperty<uint>(id, ObjectStats.EXPERIENCE, 0);
+                ushort lvl = CharactersManager.Stats.GetProperty<ushort>(id, ObjectStats.LVL);
+                ushort stats = CharactersManager.Stats.GetProperty<ushort>(id, ObjectStats.STATPOINTS);
+                CharactersManager.Stats.SetProperty<ushort>(id, ObjectStats.LVL, (ushort)(lvl + 1));
+                CharactersManager.Stats.SetProperty<ushort>(id, ObjectStats.STATPOINTS, (ushort)(stats + 3));
+            }
+            else
+            {
+                CharactersManager.Stats.SetProperty<uint>(id, ObjectStats.EXPERIENCE, (uint)(exp + 100));
+            }
+        }
+
+        private void Hit(int damage)
         {
             int health = CharactersManager.Stats.GetProperty<int>(id, ObjectStats.HP);
-            CharactersManager.Stats.SetProperty<int>(id, ObjectStats.HP, health - 25);
-            if(health <= 0)
+            CharactersManager.Stats.SetProperty<int>(id, ObjectStats.HP, health - damage);
+            if(health - damage <= 0)
             {
-                CharactersManager.RemoveCharacter(id);
+                Hidden = true;
+                CharacterRespawner.Instance.Respawn(this, Time.time + 5);
             }
         }
 
@@ -109,7 +123,17 @@ namespace GlaiveServer
                 {
                     continue;
                 }
+
                 int targetId = item.Value.id;
+                if(item.Value.Hidden)
+                {
+                    if(observedCharacters.Contains(targetId))
+                    {
+                        RemoveObservedCharacter(targetId);
+                    }
+                    continue;
+                }
+
                 double seeDistance = 25;
 
                 if (CharactersManager.GetCharacter(item.Value.id, out Character c))

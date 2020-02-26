@@ -112,13 +112,10 @@ namespace GameCoreEngine
             {
                 if (Vector3.Distance(target.transform.position, Actor.transform.position) > 2)
                 {
-                    yield return new WaitForSeconds(0.1f);
+                    yield return new WaitForSeconds(0.5f);
                 }
                 else
                 {
-                    Actor.model.animator.SetTrigger("attack");
-                    Actor.model.animator.SetInteger("attack_id", 1);
-
                     if (!attacking)
                     {
                         PacketsSender.AttackTarget(target.Id);
@@ -132,8 +129,9 @@ namespace GameCoreEngine
                         Destroy(attr.gameObject, 0.9f);
                     }
                     yield return new WaitForSeconds(0.5f);
-                    Actor.model.animator.SetTrigger("attack");
-                    Actor.model.animator.SetInteger("attack_id", 0);
+                    //Actor.model.animator.SetTrigger("attack");
+                   // Actor.model.animator.SetInteger("attack_id", 1);
+                    Debug.Log("attk");
                 }
             }
         }
@@ -156,6 +154,11 @@ namespace GameCoreEngine
             if (!interactWithTarget)
             {
                 interactWithTarget = true;
+                if(attack != null)
+                {
+                    StopCoroutine(attack);
+                }
+
                 attack = StartCoroutine(Attack());
                 PacketsSender.MoveToDestination(new PacketsSender.MoveData()
                 {
