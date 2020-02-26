@@ -31,13 +31,24 @@ namespace GlaiveServer
         public class SpawnData
         {
             public int id;
+            public string name;
             public ushort posX;
             public ushort posY;
             public ushort baseId;
+            public int health;
+            public int maxHealth;
 
             public SpawnData(Character character)
             {
                 this.id = character.id;
+                string name = CharactersManager.Stats.GetProperty<string>(character.id, ObjectStats.NAME);
+                if(string.IsNullOrEmpty(name))
+                {
+                    name = "Character";
+                }
+                this.name = name;
+                this.health = CharactersManager.Stats.GetProperty<int>(character.id, ObjectStats.HP);
+                this.maxHealth = CharactersManager.Stats.GetProperty<int>(character.id, ObjectStats.MAX_HP);
                 this.posX = character.Pos.X;
                 this.posY = character.Pos.Y;
                 this.baseId = character.baseId;
@@ -68,8 +79,11 @@ namespace GlaiveServer
 
             write.Write((byte)0);
             write.Write(data.id);
+            write.Write(data.name);
+            write.Write(data.health);
+            write.Write(data.maxHealth);
             write.Write(data.baseId);
-            write.Write(data.posX);
+            write.Write(data.posX); 
             write.Write(data.posY);
             byte[] d = GetBytes();
             target.SendData(d);
@@ -117,6 +131,9 @@ namespace GlaiveServer
                 case ObjectType.USHORT:
                     write.Write((ushort)value);
                     break;
+                case ObjectType.BYTE:
+                    write.Write((byte)value);
+                    break;
             }
 
             byte[] d = GetBytes();
@@ -129,6 +146,19 @@ namespace GlaiveServer
             BinaryWriter write = GetWriter();
 
             write.Write((byte)1);
+            write.Write(data.id);
+            write.Write(data.posX);
+            write.Write(data.posY);
+            byte[] d = GetBytes();
+            target.SendData(d);
+            Clear(stream);
+        }
+
+        public static void SetPosition(User target, MoveData data)
+        {
+            BinaryWriter write = GetWriter();
+
+            write.Write((byte)7);
             write.Write(data.id);
             write.Write(data.posX);
             write.Write(data.posY);

@@ -24,24 +24,24 @@ namespace GlaiveServer
             memoryStream = new MemoryStream();
             reader = new BinaryReader(memoryStream);
 
-            Character = CharactersManager.CreateCharacter();
+            Character = CharactersManager.CreateCharacter<Player>();
 
             int id = UsersManager.GetId();
             this.Id = id;
             Character.Pos = new Vector2UInt16(250, 205);
-            Character.baseId = 1;
+            Character.baseId = 0;
             UsersManager.AddUser(id, this);
 
-            Character.OnObserveCharacter += Character_OnObserveCharacter;
-            Character.OnUnobserveCharacter += Character_OnUnobserveCharacter;
-            Character.OnAttack += Character_OnAttack;
+            CharactersManager.Stats.SetProperty<int>(Character.id, ObjectStats.RESPAWN_TIME, 3);
+            CharactersManager.Stats.SetProperty<int>(Character.id, ObjectStats.HP, 100);
+            CharactersManager.Stats.SetProperty<int>(Character.id, ObjectStats.MAX_HP, 100);
             CharactersManager.Stats.SetProperty<uint>(Character.id, ObjectStats.MAX_EXPERIENCE, 300);
             CharactersManager.Stats.SetProperty<ushort>(Character.id, ObjectStats.LVL, 1);
             RegisterEventHandlers();
 
             PacketsSender.SpawnMonster(this, new PacketsSender.SpawnData(Character)
             {
-                baseId = 1
+                baseId = 0
             });
             PacketsSender.ControlCharacter(this, Character.id);
         }
@@ -58,6 +58,18 @@ namespace GlaiveServer
 
         private void RegisterEventHandlers()
         {
+            Character.OnObserveCharacter += Character_OnObserveCharacter;
+            Character.OnUnobserveCharacter += Character_OnUnobserveCharacter;
+            Character.OnAttack += Character_OnAttack;
+            Character.OnRespawn += Character_OnRespawn;
+
+            CharactersManager.Stats.RegisterChange(Character.id, ObjectStats.HP, (val) =>
+            {
+                int health = CharactersManager.Stats.GetProperty<int>(Character.id, ObjectStats.HP);
+
+                PacketsSender.SendStat(this, Character.id, ObjectStats.HP, ObjectType.INT, health);
+            });
+
             CharactersManager.Stats.RegisterChange(Character.id, ObjectStats.EXPERIENCE, (val) =>
             {
                 uint maxExperience = CharactersManager.Stats.GetProperty<uint>(Character.id, ObjectStats.MAX_EXPERIENCE);
@@ -101,6 +113,29 @@ namespace GlaiveServer
                 ushort value = CharactersManager.Stats.GetProperty<ushort>(Character.id, ObjectStats.STATPOINTS);
                 PacketsSender.SendStat(this, Character.id, ObjectStats.STATPOINTS, ObjectType.USHORT, value);
             });
+
+            CharactersManager.Stats.RegisterChange(Character.id, ObjectStats.DEAD, (val) =>
+            {
+                byte value = CharactersManager.Stats.GetProperty<byte>(Character.id, ObjectStats.DEAD);
+                PacketsSender.SendStat(this, Character.id, ObjectStats.DEAD, ObjectType.BYTE, value);
+            });
+        }
+
+        private void Character_OnRespawn(Character obj)
+        {
+            PacketsSender.MoveData data = new PacketsSender.MoveData()
+            {
+                id = obj.id,
+                posX = 235,
+                posY = 243
+            };
+
+            foreach (var item in obj.GetObservedUsers())
+            {
+                PacketsSender.SetPosition(item, data);
+            }
+
+            PacketsSender.SetPosition(this, data);
         }
 
         private void Character_OnUnobserveCharacter(int id)

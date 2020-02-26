@@ -15,8 +15,8 @@ public class PacketsReceivedManager : MonoBehaviour
         { 4, ControlCharacter },
         { 5, ReceiveStat },
         { 6, ReceiveAttack },
+        { 7, SetPosition },
     };
-
 
     private delegate void PacketReceivedAction(BinaryReader reader);
     private static MemoryStream memoryStream;
@@ -81,6 +81,9 @@ public class PacketsReceivedManager : MonoBehaviour
             case ObjectType.USHORT:
                 value = reader.ReadUInt16();
                 break;
+            case ObjectType.BYTE:
+                value = reader.ReadByte();
+                break;
             default:
                 value = 0;
                 break;
@@ -110,6 +113,9 @@ public class PacketsReceivedManager : MonoBehaviour
         CharactersManager.SpawnData data = new CharactersManager.SpawnData()
         {
             id = reader.ReadInt32(),
+            name = reader.ReadString(),
+            health = reader.ReadInt32(),
+            maxHealth = reader.ReadInt32(),
             baseId = reader.ReadUInt16(),
             posX = reader.ReadUInt16(),
             posZ = reader.ReadUInt16(),
@@ -157,6 +163,23 @@ public class PacketsReceivedManager : MonoBehaviour
             if (CharactersManager.Instance.GetCharacter(id, out GameCoreEngine.Character c))
             {
                 c.SetDestination(new Vector3(posX, 0, posZ));
+            }
+        });
+    }
+
+    private static void SetPosition(BinaryReader reader)
+    {
+        int id = reader.ReadInt32();
+        ushort posX = reader.ReadUInt16();
+        ushort posZ = reader.ReadUInt16();
+
+        UnityMainThreadDispatcher.Instance().Enqueue(() =>
+        {
+            if (CharactersManager.Instance.GetCharacter(id, out GameCoreEngine.Character c))
+            {
+                Vector3 pos = new Vector3(posX, 0, posZ);
+                c.transform.position = pos;
+                c.SetDestination(pos);
             }
         });
     }

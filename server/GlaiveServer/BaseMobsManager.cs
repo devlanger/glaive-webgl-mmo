@@ -16,6 +16,7 @@ namespace GlaiveServer
             public byte lvl;
             public int health;
             public int expReward;
+            public int respawnTime;
             public ushort min_dmg;
             public ushort max_dmg;
         }
@@ -58,9 +59,12 @@ namespace GlaiveServer
                 if (mobsProto.ContainsKey(baseId))
                 {
                     BaseMobData data = mobsProto[baseId];
-                    Character c = CharactersManager.CreateCharacter();
+                    Character c = CharactersManager.CreateCharacter<Monster>();
 
+                    c.baseId = baseId;
                     c.Pos = pos;
+                    CharactersManager.Stats.SetProperty(c.id, ObjectStats.NAME, (string)data.name);
+                    CharactersManager.Stats.SetProperty(c.id, ObjectStats.RESPAWN_TIME, (int)respawnTime);
                     CharactersManager.Stats.SetProperty(c.id, ObjectStats.HP, (int)data.health);
                     CharactersManager.Stats.SetProperty(c.id, ObjectStats.MAX_HP, (int)data.health);
                     CharactersManager.Stats.SetProperty(c.id, ObjectStats.LVL, (ushort)data.lvl);

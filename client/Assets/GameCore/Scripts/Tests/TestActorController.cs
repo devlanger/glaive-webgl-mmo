@@ -76,7 +76,7 @@ namespace GameCoreEngine
             {
                 if (target)
                 {
-                    targetPoint = target.transform.position + (ToTargetVector() * 1.5f);
+                    //targetPoint = target.transform.position + (ToTargetVector() * 1.5f);
                     //short hp = (short)GameCore.Stats.GetProperty(a.Id, ObjectStats.HP);
                     //GameCore.Stats.SetProperty(a.Id, ObjectStats.HP, (short)(hp - 10));
                 }
@@ -110,12 +110,14 @@ namespace GameCoreEngine
             bool attacking = false;
             while (target && !target.IsDead)
             {
-                if (Vector3.Distance(target.transform.position, Actor.transform.position) > 2)
+                if (Vector3.Distance(target.transform.position, Actor.transform.position) > 2.5f)
                 {
                     yield return new WaitForSeconds(0.5f);
                 }
                 else
                 {
+                    actor.LookAt(target.transform.position);
+
                     if (!attacking)
                     {
                         PacketsSender.AttackTarget(target.Id);
@@ -142,6 +144,20 @@ namespace GameCoreEngine
             FindObjectOfType<IsometricCameraController>().SetTarget(actor);
 
             OnPlayerInitialized((Character)actor);
+
+            GameCore.Stats.RegisterChange(actor.Id, ObjectStats.DEAD, (val) =>
+            {
+                byte isDead = (byte)val;
+                switch(isDead)
+                {
+                    case (byte)0:
+                        FindObjectOfType<Camera>().enabled = true;
+                        break;
+                    case (byte)1:
+                        FindObjectOfType<Camera>().enabled = false;
+                        break;
+                }
+            });
         }
 
         public void SetTarget(Actor actor)
@@ -160,10 +176,13 @@ namespace GameCoreEngine
                 }
 
                 attack = StartCoroutine(Attack());
+                Vector3 pos = target.transform.position;
+                pos -= (this.target.transform.position - actor.transform.position).normalized * 2;
+
                 PacketsSender.MoveToDestination(new PacketsSender.MoveData()
                 {
-                    posX = (ushort)target.transform.position.x,
-                    posY = (ushort)target.transform.position.z
+                    posX = (ushort)pos.x,
+                    posY = (ushort)pos.z
                 });
             }
         }

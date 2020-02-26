@@ -32,9 +32,9 @@ public class CharactersManager
         characters.Add(target.id, target);
     }
 
-    public static Character CreateCharacter()
+    public static T CreateCharacter<T>() where T : Character, new()
     {
-        Character target = new Character();
+        T target = new T();
         target.id = GetId();
         RegisterEvents(target);
 

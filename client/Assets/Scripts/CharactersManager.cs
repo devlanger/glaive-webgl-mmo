@@ -56,6 +56,9 @@ public class CharactersManager : Singleton<CharactersManager>
     public class SpawnData
     {
         public int id;
+        public string name;
+        public int health;
+        public int maxHealth;
         public ushort baseId;
         public ushort posX;
         public ushort posZ;
@@ -63,9 +66,12 @@ public class CharactersManager : Singleton<CharactersManager>
 
     public void SpawnCharacter(SpawnData data)
     {
-        Vector3 pos = new Vector3(data.posX, 1, data.posZ);
+        Vector3 pos = new Vector3(data.posX, 0.5f, data.posZ);
         Character actorBase = Instantiate(characterBase, pos, Quaternion.identity);
         actorBase.Id = data.id;
+        actorBase.name = data.name;
+        GameCore.Stats.SetProperty<int>(data.id, ObjectStats.HP, data.health);
+        GameCore.Stats.SetProperty<int>(data.id, ObjectStats.MAX_HP, data.maxHealth);
         GameObject actorModelGo = GameObject.Instantiate(models[data.baseId], pos, actorBase.transform.rotation);
         ActorModel actorModel = actorModelGo.GetComponent<ActorModel>();
 

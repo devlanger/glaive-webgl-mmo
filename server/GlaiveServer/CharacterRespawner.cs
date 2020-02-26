@@ -15,9 +15,7 @@ namespace GlaiveServer
 
             public void Respawn()
             {
-                int maxHp = CharactersManager.Stats.GetProperty<int>(target.id, GameCoreEngine.ObjectStats.MAX_HP);
-                CharactersManager.Stats.SetProperty<int>(target.id, GameCoreEngine.ObjectStats.HP, maxHp);
-                target.Hidden = false;
+                target.Respawn();
             }
         }
 

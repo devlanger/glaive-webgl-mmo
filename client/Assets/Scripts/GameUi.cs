@@ -40,8 +40,8 @@ public class GameUi : MonoBehaviour
 
         GameCore.Stats.RegisterChange(actor.Id, ObjectStats.HP, (val) =>
         {
-            uint health = (uint)val;
-            uint maxHealth = GameCore.Stats.GetProperty<uint>(actor.Id, ObjectStats.MAX_HP);
+            int health = (int)val;
+            int maxHealth = GameCore.Stats.GetProperty<int>(actor.Id, ObjectStats.MAX_HP);
             healthBar.fillAmount = (float)((float)health / (float)maxHealth);
         });
 

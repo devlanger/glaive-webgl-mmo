@@ -42,6 +42,7 @@ public class CharacterLabel : MonoBehaviour
     private void OnHealthChanged(object v)
     {
         int health = (int)v;
-        fill.fillAmount = (float)health / 100f;
+        int maxHealth = GameCore.Stats.GetProperty<int>(target.Id, ObjectStats.MAX_HP);
+        fill.fillAmount = (float)health / (float)maxHealth;
     }
 }

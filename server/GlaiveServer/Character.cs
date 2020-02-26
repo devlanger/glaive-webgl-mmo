@@ -23,15 +23,10 @@ namespace GlaiveServer
         public event Action<int> OnObserveCharacter = delegate { };
         public event Action<int> OnUnobserveCharacter = delegate { };
         public event Action<Character> OnAttack = delegate { };
-        
+        public event Action<Character> OnRespawn = delegate { };
+
         public Character target;
         public float lastAttackTime;
-
-
-
-        public Character()
-        {
-        }
 
         public List<Character> GetObservedCharacters()
         {
@@ -70,47 +65,58 @@ namespace GlaiveServer
             UpdateAttack();
         }
 
-        private void UpdateAttack()
+        protected virtual void UpdateAttack()
         {
-            if (target != null && Time.time >= lastAttackTime + 0.5f)
+            if (target != null && !target.Hidden && Time.time >= lastAttackTime + 0.5f)
             {
                 OnAttack(target);
-                target.Hit(25);
+                target.Hit(this, 25);
+
+                OnTargetHit(target);
                 if (target.Hidden)
                 {
-                    AddExperience(100);
-                }
+                    OnDefeatedTarget(target);
+                }   
+
 
                 lastAttackTime = Time.time;
             }
         }
 
-        private void AddExperience(int amount)
+        public virtual void Respawn()
         {
-            uint exp = CharactersManager.Stats.GetProperty<uint>(id, ObjectStats.EXPERIENCE);
-
-            if (exp + amount >= 300)
-            {
-                CharactersManager.Stats.SetProperty<uint>(id, ObjectStats.EXPERIENCE, 0);
-                ushort lvl = CharactersManager.Stats.GetProperty<ushort>(id, ObjectStats.LVL);
-                ushort stats = CharactersManager.Stats.GetProperty<ushort>(id, ObjectStats.STATPOINTS);
-                CharactersManager.Stats.SetProperty<ushort>(id, ObjectStats.LVL, (ushort)(lvl + 1));
-                CharactersManager.Stats.SetProperty<ushort>(id, ObjectStats.STATPOINTS, (ushort)(stats + 3));
-            }
-            else
-            {
-                CharactersManager.Stats.SetProperty<uint>(id, ObjectStats.EXPERIENCE, (uint)(exp + 100));
-            }
+            int maxHp = CharactersManager.Stats.GetProperty<int>(id, GameCoreEngine.ObjectStats.MAX_HP);
+            CharactersManager.Stats.SetProperty<byte>(id, GameCoreEngine.ObjectStats.DEAD, 0);
+            CharactersManager.Stats.SetProperty<int>(id, GameCoreEngine.ObjectStats.HP, maxHp);
+            Hidden = false;
+            OnRespawn(this);
         }
 
-        private void Hit(int damage)
+        protected virtual void OnTargetHit(Character target)
+        {
+
+        }
+
+        protected virtual void OnDefeatedTarget(Character target)
+        {
+
+        }
+
+        protected virtual void AddExperience(int amount)
+        {
+            
+        }
+
+        protected virtual void Hit(Character attacker, int damage)
         {
             int health = CharactersManager.Stats.GetProperty<int>(id, ObjectStats.HP);
             CharactersManager.Stats.SetProperty<int>(id, ObjectStats.HP, health - damage);
             if(health - damage <= 0)
             {
                 Hidden = true;
-                CharacterRespawner.Instance.Respawn(this, Time.time + 5);
+                CharactersManager.Stats.SetProperty<byte>(id, GameCoreEngine.ObjectStats.DEAD, 1);
+                int respawnTime = CharactersManager.Stats.GetProperty<int>(id, ObjectStats.RESPAWN_TIME);
+                CharacterRespawner.Instance.Respawn(this, Time.time + respawnTime);
             }
         }
 
@@ -173,14 +179,20 @@ namespace GlaiveServer
 
         private void AddObservedCharacter(int id)
         {
-            Console.WriteLine("Add character: " + id + " for character:" + this.id);
+            if (Globals.LOGGING_LEVEL > 0)
+            {
+                Console.WriteLine("Add character: " + id + " for character:" + this.id);
+            }
             observedCharacters.Add(id);
             OnObserveCharacter(id);
         }
 
         private void RemoveObservedCharacter(int id)
         {
-            Console.WriteLine("Remove character: " + id + " for character:" + this.id);
+            if (Globals.LOGGING_LEVEL > 0)
+            {
+                Console.WriteLine("Remove character: " + id + " for character:" + this.id);
+            }
             observedCharacters.Remove(id);
             OnUnobserveCharacter(id);
         }
