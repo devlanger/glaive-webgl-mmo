@@ -48,45 +48,75 @@ public class CharacterWindow : MonoBehaviour
 
     private void Instance_OnPlayerInitialized(Character actor)
     {
+        StatChanged(ObjectStats.LVL, GameCore.Stats.GetProperty<object>(actor.Id, ObjectStats.LVL));
+        StatChanged(ObjectStats.VIT, GameCore.Stats.GetProperty<object>(actor.Id, ObjectStats.VIT));
+        StatChanged(ObjectStats.STR, GameCore.Stats.GetProperty<object>(actor.Id, ObjectStats.STR));
+        StatChanged(ObjectStats.DEX, GameCore.Stats.GetProperty<object>(actor.Id, ObjectStats.DEX));
+        StatChanged(ObjectStats.INT, GameCore.Stats.GetProperty<object>(actor.Id, ObjectStats.INT));
+        StatChanged(ObjectStats.STATPOINTS, GameCore.Stats.GetProperty<object>(actor.Id, ObjectStats.STATPOINTS));
+
         GameCore.Stats.RegisterChange(actor.Id, ObjectStats.LVL, (val) =>
         {
-            ushort value = (ushort)val;
-            lvlText.text = value.ToString();
+            StatChanged(ObjectStats.LVL, val);
         });
         GameCore.Stats.RegisterChange(actor.Id, ObjectStats.STR, (val) =>
         {
-            ushort value = (ushort)val;
-            strText.text = value.ToString();
+            StatChanged(ObjectStats.STR, val);
         });
         GameCore.Stats.RegisterChange(actor.Id, ObjectStats.DEX, (val) =>
         {
-            ushort value = (ushort)val;
-            dexText.text = value.ToString();
+            StatChanged(ObjectStats.DEX, val);
         });
         GameCore.Stats.RegisterChange(actor.Id, ObjectStats.VIT, (val) =>
         {
-            ushort value = (ushort)val;
-            vitText.text = value.ToString();
+            StatChanged(ObjectStats.VIT, val);
         });
         GameCore.Stats.RegisterChange(actor.Id, ObjectStats.INT, (val) =>
         {
-            ushort value = (ushort)val;
-            intText.text = value.ToString();
+            StatChanged(ObjectStats.INT, val);
         });
         GameCore.Stats.RegisterChange(actor.Id, ObjectStats.STATPOINTS, (val) =>
         {
-            ushort value = (ushort)val;
-            pointsText.text = value.ToString();
-
-            if(value > 0)
-            {
-                ActivateButtons();
-            }
-            else
-            {
-                DeactivateButtons();
-            }
+            StatChanged(ObjectStats.STATPOINTS, val);
         });
+    }
+
+    private void StatChanged(ObjectStats stat, object value)
+    {
+        if(value == null)
+        {
+            return;
+        }
+        switch(stat)
+        {
+            case ObjectStats.LVL:
+                lvlText.text = value.ToString();
+                break;
+            case ObjectStats.STR:
+                strText.text = value.ToString();
+                break;
+            case ObjectStats.DEX:
+                dexText.text = value.ToString();
+                break;
+            case ObjectStats.VIT:
+                vitText.text = value.ToString();
+                break;
+            case ObjectStats.INT:
+                intText.text = value.ToString();
+                break;
+            case ObjectStats.STATPOINTS:
+                pointsText.text = value.ToString();
+
+                if ((ushort)value > 0)
+                {
+                    ActivateButtons();
+                }
+                else
+                {
+                    DeactivateButtons();
+                }
+                break;
+        }
     }
 
     private void ActivateButtons()

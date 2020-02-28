@@ -10,6 +10,7 @@ namespace GameCoreEngine
     {
         private Vector3 destination;
 
+
         public bool IsDead { get; set; }
         public bool Moving { get; private set; }
 
@@ -64,12 +65,6 @@ namespace GameCoreEngine
         {
             model.animator.SetTrigger("attack");
             model.animator.SetInteger("attack_id", 1);
-        }
-
-        public void SetModel(ActorModel actorModel)
-        {
-            this.model = actorModel;
-            model.transform.parent = transform;
         }
 
         public void SetDestination(Vector3 destination)

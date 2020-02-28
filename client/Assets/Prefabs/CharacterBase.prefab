@@ -10,7 +10,6 @@ GameObject:
   m_Component:
   - component: {fileID: 348923932760658570}
   - component: {fileID: 348923932760658571}
-  - component: {fileID: 348923932760658564}
   - component: {fileID: 348923932760658565}
   m_Layer: 8
   m_Name: CharacterBase
@@ -46,24 +45,6 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 1.5, y: 2, z: 1.5}
   m_Center: {x: 0, y: 1, z: 0}
---- !u!114 &348923932760658564
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 348923932760658566}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 57af6f402fa6a9e4fb005b3e717d7cbf, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  Id: 2
-  Jumping: 0
-  jumpPower: 10
-  moveSpeed: 5
-  jumpIndex: 0
-  model: {fileID: 0}
 --- !u!54 &348923932760658565
 Rigidbody:
   m_ObjectHideFlags: 0

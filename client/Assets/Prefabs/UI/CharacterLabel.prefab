@@ -238,8 +238,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b25571bf129ee6643983f021fdf9a61a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  target: {fileID: 0}
   nameText: {fileID: 1448012819507246532}
+  fillBackground: {fileID: 1448012820198955869}
   fill: {fileID: 1448012819629056201}
 --- !u!1 &1448012820198955869
 GameObject:

@@ -28,7 +28,7 @@ public class CharacterLabels : MonoBehaviour
         }
     }
 
-    private void Instance_OnCharacterAdded(int arg1, GameCoreEngine.Character arg2)
+    private void Instance_OnCharacterAdded(int arg1, WorldObject arg2)
     {
         if(arg1 == TestActorController.Instance.Actor.Id)
         {

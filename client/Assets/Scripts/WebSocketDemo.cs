@@ -26,8 +26,7 @@ public class WebSocketDemo : Singleton<WebSocketDemo>
         ws.Close();
     }
 
-    // Use this for initialization
-    void Start () {
+    private void Start () {
 
         PacketsReceivedManager.Initialize();
 
@@ -39,8 +38,6 @@ public class WebSocketDemo : Singleton<WebSocketDemo>
         {
             Debug.Log("WS connected!");
             Debug.Log("WS state: " + ws.GetState().ToString());
-
-            ws.Send(Encoding.UTF8.GetBytes("Hello from Unity 3D!"));
         };
 
         // Add OnMessage event listener

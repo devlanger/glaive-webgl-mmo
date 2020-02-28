@@ -14,7 +14,7 @@ namespace GlaiveServer
             int health = CharactersManager.Stats.GetProperty<int>(id, ObjectStats.HP);
             if (health <= 0)
             {
-                target = null;
+                Die();
             }
             else
             {
@@ -25,7 +25,19 @@ namespace GlaiveServer
         protected override void OnTargetHit(Character target)
         {
             base.OnTargetHit(target);
+
             Console.WriteLine(target + " get hit");
+        }
+
+        protected override void Die()
+        {
+            base.Die();
+
+            Drop d = CharactersManager.CreateCharacter<Drop>(new PacketsSender.SpawnData()
+            {
+                name = "Drop",
+                pos = Pos
+            });
         }
     }
 }

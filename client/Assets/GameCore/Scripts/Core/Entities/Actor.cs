@@ -6,10 +6,8 @@ using UnityEngine;
 namespace GameCoreEngine
 {
     [RequireComponent(typeof(Rigidbody))]
-    public class Actor : MonoBehaviour
+    public class Actor : WorldObject
     {
-        public int Id = 0;
-
         protected Rigidbody rigidbody;
 
         private Vector3 direction;
@@ -23,8 +21,6 @@ namespace GameCoreEngine
 
         public int jumpIndex;
         private float jumpTime;
-
-        public ActorModel model;
 
         public bool Grounded
         {
@@ -47,12 +43,6 @@ namespace GameCoreEngine
             rigidbody.useGravity = true;
             hasMoved = true;
         }
-
-        /*public void Move(Vector3 destination)
-        {
-            targetPos.x = Mathf.RoundToInt(destination.x);
-            targetPos.z = Mathf.RoundToInt(destination.z);
-        }*/
 
         public Vector3 GetPosition()
         {

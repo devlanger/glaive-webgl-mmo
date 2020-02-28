@@ -29,8 +29,12 @@ namespace GlaiveServer
             int id = UsersManager.GetId();
             this.Id = id;
             Character.Pos = new Vector2UInt16(250, 205);
-            Character.baseId = 0;
             UsersManager.AddUser(id, this);
+
+            CharactersManager.Stats.SetProperty<ushort>(Character.id, ObjectStats.STR, 6);
+            CharactersManager.Stats.SetProperty<ushort>(Character.id, ObjectStats.INT, 2);
+            CharactersManager.Stats.SetProperty<ushort>(Character.id, ObjectStats.VIT, 4);
+            CharactersManager.Stats.SetProperty<ushort>(Character.id, ObjectStats.DEX, 3);
 
             CharactersManager.Stats.SetProperty<int>(Character.id, ObjectStats.RESPAWN_TIME, 3);
             CharactersManager.Stats.SetProperty<int>(Character.id, ObjectStats.HP, 100);
@@ -43,7 +47,13 @@ namespace GlaiveServer
             {
                 baseId = 0
             });
-            PacketsSender.ControlCharacter(this, Character.id);
+
+            PacketsSender.ControlCharacter(this, new PacketsSender.ControlData(Character));
+
+            Item i = ItemsManager.Instance.CreateItem(3);
+            CharactersManager.Items.records.Add(Character.id, new RecordsHandler<ushort, Item>());
+            CharactersManager.Items.GetRecords(Character.id).SetRecord(0, i);
+            PacketsSender.SendItemsList(this, RecordType.BACKPACK, CharactersManager.Items.GetRecords(Character.id).records);
         }
 
         private void Character_OnAttack(Character target)
@@ -145,7 +155,7 @@ namespace GlaiveServer
 
         private void Character_OnObserveCharacter(int id)
         {
-            if (CharactersManager.GetCharacter(id, out Character c))
+            if (CharactersManager.GetCharacter(id, out WorldObject c))
             {
                 PacketsSender.SpawnMonster(this, new PacketsSender.SpawnData(c));
             }

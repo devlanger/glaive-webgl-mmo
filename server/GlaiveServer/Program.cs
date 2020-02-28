@@ -10,6 +10,7 @@ namespace GlaiveServer
         public static void Main(string[] args)
         {
             DatabaseUtils.Initialize();
+            ItemsManager items = new ItemsManager();
             BaseMobsManager mobs = new BaseMobsManager();
             CharacterRespawner respawn = new CharacterRespawner();
             ZonesManager zones = new ZonesManager();

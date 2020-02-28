@@ -6,15 +6,14 @@ using UnityEngine;
 
 public class CharactersManager : Singleton<CharactersManager>
 {
-    public Dictionary<int, Character> characters = new Dictionary<int, Character>();
+    public Dictionary<int, WorldObject> characters = new Dictionary<int, WorldObject>();
 
     [SerializeField]
-    private Character characterBase;
+    private GameObject characterBase;
 
-    [SerializeField]
-    private GameObject[] models;
+    public GameObject[] models;
 
-    public event Action<int, Character> OnCharacterAdded = delegate { };
+    public event Action<int, WorldObject> OnCharacterAdded = delegate { };
     public event Action<int> OnCharacterRemoved = delegate { };
 
     private void Awake()
@@ -25,11 +24,11 @@ public class CharactersManager : Singleton<CharactersManager>
         }
     }
 
-    public bool GetCharacter(int id, out Character c)
+    public bool GetCharacter<T>(int id, out T c) where T : WorldObject
     {
         if(characters.ContainsKey(id))
         {
-            c = characters[id];
+            c = characters[id] as T;
             return true;
         }
         else
@@ -39,7 +38,7 @@ public class CharactersManager : Singleton<CharactersManager>
         }
     }
 
-    public bool AddCharacter(int id, Character c)
+    public bool AddCharacter(int id, WorldObject c)
     {
         if (characters.ContainsKey(id))
         {
@@ -55,6 +54,7 @@ public class CharactersManager : Singleton<CharactersManager>
 
     public class SpawnData
     {
+        public SpawnType type;
         public int id;
         public string name;
         public int health;
@@ -62,30 +62,32 @@ public class CharactersManager : Singleton<CharactersManager>
         public ushort baseId;
         public ushort posX;
         public ushort posZ;
+
+        public enum SpawnType
+        {
+            CHARACTER = 1,
+            DROP = 2
+        }
     }
 
-    public void SpawnCharacter(SpawnData data)
+    public void SpawnCharacter<T>(SpawnData data) where T : WorldObject
     {
         Vector3 pos = new Vector3(data.posX, 0.5f, data.posZ);
-        Character actorBase = Instantiate(characterBase, pos, Quaternion.identity);
+
+        GameObject actorBaseGameObject = Instantiate(characterBase.gameObject, pos, Quaternion.identity);
+        T actorBase = actorBaseGameObject.AddComponent<T>();
         actorBase.Id = data.id;
         actorBase.name = data.name;
         GameCore.Stats.SetProperty<int>(data.id, ObjectStats.HP, data.health);
         GameCore.Stats.SetProperty<int>(data.id, ObjectStats.MAX_HP, data.maxHealth);
-        GameObject actorModelGo = GameObject.Instantiate(models[data.baseId], pos, actorBase.transform.rotation);
-        ActorModel actorModel = actorModelGo.GetComponent<ActorModel>();
 
-        if (actorModel)
-        {
-            actorBase.SetModel(actorModel);
-        }
-
+        actorBase.SetModel(data.baseId);
         AddCharacter(data.id, actorBase);
     }
 
     public void DespawnCharacter(int id)
     {
-        if(GetCharacter(id, out Character c))
+        if(GetCharacter(id, out WorldObject c))
         {
             Destroy(c.gameObject);
         }

@@ -16,6 +16,7 @@ public class PacketsReceivedManager : MonoBehaviour
         { 5, ReceiveStat },
         { 6, ReceiveAttack },
         { 7, SetPosition },
+        { 8, ItemsReceived },
     };
 
     private delegate void PacketReceivedAction(BinaryReader reader);
@@ -63,6 +64,44 @@ public class PacketsReceivedManager : MonoBehaviour
 
         PacketsSender.Clear(memoryStream);
     }
+
+    private static void ItemsReceived(BinaryReader reader)
+    {
+        RecordType type = (RecordType)reader.ReadByte();
+        byte count = reader.ReadByte();
+
+        for (int i = 0; i < count; i++)
+        {
+            ushort slot = reader.ReadUInt16();
+            int baseId = reader.ReadInt32();
+            int value1 = reader.ReadInt32();
+            int value2 = reader.ReadInt32();
+
+            Item itemInstance = new Item()
+            {
+                baseId = baseId,
+                value1 = value1,
+                value2 = value2
+            };
+
+            UnityMainThreadDispatcher.Instance().Enqueue(() =>
+            {
+                switch (type)
+                {
+                    case RecordType.BACKPACK:
+                        Inventory.Instance.backpack.SetRecord(slot, itemInstance);
+                        break;
+                    case RecordType.EQUIPMENT:
+                        Inventory.Instance.equipment.SetRecord(slot, itemInstance);
+                        break;
+                    case RecordType.WAREHOUSE:
+                        Inventory.Instance.warehouse.SetRecord(slot, itemInstance);
+                        break;
+                }
+            });
+        }
+    }
+
     private static void ReceiveStat(BinaryReader reader)
     {
         int id = reader.ReadInt32();
@@ -112,6 +151,7 @@ public class PacketsReceivedManager : MonoBehaviour
     {
         CharactersManager.SpawnData data = new CharactersManager.SpawnData()
         {
+            type = (CharactersManager.SpawnData.SpawnType)reader.ReadByte(),
             id = reader.ReadInt32(),
             name = reader.ReadString(),
             health = reader.ReadInt32(),
@@ -124,7 +164,15 @@ public class PacketsReceivedManager : MonoBehaviour
         UnityMainThreadDispatcher.Instance().Enqueue(() =>
         {
             Debug.Log("Spawn: " + data.id);
-            CharactersManager.Instance.SpawnCharacter(data);
+            switch(data.type)
+            {
+                case CharactersManager.SpawnData.SpawnType.DROP:
+                    CharactersManager.Instance.SpawnCharacter<Drop>(data);
+                    break;
+                case CharactersManager.SpawnData.SpawnType.CHARACTER:
+                    CharactersManager.Instance.SpawnCharacter<Character>(data);
+                    break;
+            }
         });
     }
 
@@ -141,12 +189,25 @@ public class PacketsReceivedManager : MonoBehaviour
     private static void ControlCharacter(BinaryReader reader)
     {
         int id = reader.ReadInt32();
+        ushort lvl = reader.ReadUInt16();
+        ushort str = reader.ReadUInt16();
+        ushort vit = reader.ReadUInt16();
+        ushort dex = reader.ReadUInt16();
+        ushort intel = reader.ReadUInt16();
+        ushort statPoints = reader.ReadUInt16();
 
         UnityMainThreadDispatcher.Instance().Enqueue(() =>
         {
             Debug.Log("Control: " + id);
             if (CharactersManager.Instance.GetCharacter(id, out GameCoreEngine.Character c))
             {
+                GameCore.Stats.SetProperty<ushort>(id, ObjectStats.LVL, lvl);
+                GameCore.Stats.SetProperty<ushort>(id, ObjectStats.STR, str);
+                GameCore.Stats.SetProperty<ushort>(id, ObjectStats.VIT, vit);
+                GameCore.Stats.SetProperty<ushort>(id, ObjectStats.DEX, dex);
+                GameCore.Stats.SetProperty<ushort>(id, ObjectStats.INT, intel);
+                GameCore.Stats.SetProperty<ushort>(id, ObjectStats.STATPOINTS, statPoints);
+
                 TestActorController.Instance.SetPlayer(c);
             }
         });

@@ -28,18 +28,50 @@ namespace GlaiveServer
         }
         #endregion
 
-        public class SpawnData
+        public class ControlData
         {
             public int id;
+            public ushort lvl;
+            public ushort vit;
+            public ushort str;
+            public ushort intel;
+            public ushort dex;
+            public ushort statPoints;
+
+            public ControlData(WorldObject character)
+            {
+                this.id = character.id;
+                this.lvl = CharactersManager.Stats.GetProperty<ushort>(id, ObjectStats.LVL);
+                this.str = CharactersManager.Stats.GetProperty<ushort>(id, ObjectStats.STR);
+                this.vit = CharactersManager.Stats.GetProperty<ushort>(id, ObjectStats.VIT);
+                this.intel = CharactersManager.Stats.GetProperty<ushort>(id, ObjectStats.INT);
+                this.dex = CharactersManager.Stats.GetProperty<ushort>(id, ObjectStats.DEX);
+                this.statPoints = CharactersManager.Stats.GetProperty<ushort>(id, ObjectStats.STATPOINTS);
+            }
+        }
+
+        public class SpawnData
+        {
+            public SpawnType type;
+            public int id;
             public string name;
-            public ushort posX;
-            public ushort posY;
+            public Vector2UInt16 pos;
             public ushort baseId;
             public int health;
             public int maxHealth;
 
-            public SpawnData(Character character)
+            public enum SpawnType
             {
+                CHARACTER = 1,
+                DROP = 2
+            }
+            public SpawnData()
+            {
+            }
+
+            public SpawnData(WorldObject character)
+            {
+                this.type = character.SpawnType;
                 this.id = character.id;
                 string name = CharactersManager.Stats.GetProperty<string>(character.id, ObjectStats.NAME);
                 if(string.IsNullOrEmpty(name))
@@ -49,18 +81,23 @@ namespace GlaiveServer
                 this.name = name;
                 this.health = CharactersManager.Stats.GetProperty<int>(character.id, ObjectStats.HP);
                 this.maxHealth = CharactersManager.Stats.GetProperty<int>(character.id, ObjectStats.MAX_HP);
-                this.posX = character.Pos.X;
-                this.posY = character.Pos.Y;
+                this.pos = character.Pos;
                 this.baseId = character.baseId;
             }
         }
 
-        public static void ControlCharacter(User target, int id)
+        public static void ControlCharacter(User target, ControlData data)
         {
             BinaryWriter write = GetWriter();
 
             write.Write((byte)4);
-            write.Write(id);
+            write.Write(data.id);
+            write.Write(data.lvl);
+            write.Write(data.str);
+            write.Write(data.vit);
+            write.Write(data.dex);
+            write.Write(data.intel);
+            write.Write(data.statPoints);
             byte[] d = GetBytes();
             target.SendData(d);
             Clear(stream);
@@ -78,13 +115,33 @@ namespace GlaiveServer
             BinaryWriter write = GetWriter();
 
             write.Write((byte)0);
+            write.Write((byte)data.type);
             write.Write(data.id);
             write.Write(data.name);
             write.Write(data.health);
             write.Write(data.maxHealth);
             write.Write(data.baseId);
-            write.Write(data.posX); 
-            write.Write(data.posY);
+            write.Write(data.pos.X); 
+            write.Write(data.pos.Y);
+            byte[] d = GetBytes();
+            target.SendData(d);
+            Clear(stream);
+        }
+
+        public static void SendItemsList(User target, RecordType type, Dictionary<ushort, Item> items)
+        {
+            BinaryWriter write = GetWriter();
+
+            write.Write((byte)8);
+            write.Write((byte)type);
+            write.Write((byte)items.Count);
+            foreach (var item in items)
+            {
+                write.Write(item.Key);
+                write.Write(item.Value.baseId);
+                write.Write(item.Value.value1);
+                write.Write(item.Value.value2);
+            }
             byte[] d = GetBytes();
             target.SendData(d);
             Clear(stream);

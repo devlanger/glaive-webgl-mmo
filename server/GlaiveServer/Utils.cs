@@ -7,9 +7,9 @@ namespace GlaiveServer
 {
     public static class Utils
     {
-        public static double DistanceBetween(Character c1, Character c2)
+        public static double DistanceBetween(Vector2UInt16 c1, Vector2UInt16 c2)
         {
-            return Math.Sqrt(Math.Pow(c1.Pos.X - c2.Pos.X, 2) + Math.Pow(c2.Pos.Y- c1.Pos.Y, 2));
+            return Math.Sqrt(Math.Pow(c1.X - c2.X, 2) + Math.Pow(c2.Y- c1.Y, 2));
         }
     }
 

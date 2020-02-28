@@ -7,10 +7,13 @@ using UnityEngine.UI;
 
 public class CharacterLabel : MonoBehaviour
 {
-    private Character target;
+    private WorldObject target;
 
     [SerializeField]
     private Text nameText;
+
+    [SerializeField]
+    private GameObject fillBackground;
 
     [SerializeField]
     private Image fill;
@@ -32,10 +35,18 @@ public class CharacterLabel : MonoBehaviour
         GameCore.Stats.UnregisterChange(target.Id, ObjectStats.HP, OnHealthChanged);
     }
 
-    public void Fill(Character arg2)
+    public void Fill(WorldObject arg2)
     {
         target = arg2;
         nameText.text = arg2.name;
+
+        if (arg2 is Drop)
+        {
+            fill.enabled = false;
+            fillBackground.SetActive(false);
+            return;
+        }
+
         GameCore.Stats.RegisterChange(target.Id, ObjectStats.HP, OnHealthChanged);
     }
 
