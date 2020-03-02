@@ -19,6 +19,7 @@ namespace GlaiveServer
             public int respawnTime;
             public ushort min_dmg;
             public ushort max_dmg;
+            public byte spawnType;
         }
 
         public Dictionary<int, BaseMobData> mobsProto = new Dictionary<int, BaseMobData>();
@@ -49,6 +50,7 @@ namespace GlaiveServer
                 Vector2UInt16 pos = new Vector2UInt16((ushort)(double)table.Rows[i]["pos_x"], (ushort)(double)table.Rows[i]["pos_z"]);
                 float respawnTime = (int)table.Rows[i]["respawn_time"];
                 byte zoneId = (byte)table.Rows[i]["zone_id"];
+                byte spawnType = (byte)table.Rows[i]["spawn_type"];
 
                 if (!mobsProto.ContainsKey(baseId))
                 {
@@ -59,7 +61,17 @@ namespace GlaiveServer
                 if (mobsProto.ContainsKey(baseId))
                 {
                     BaseMobData data = mobsProto[baseId];
-                    Character c = CharactersManager.CreateCharacter<Monster>();
+                    Character c;
+
+                    switch((PacketsSender.SpawnData.SpawnType)spawnType)
+                    {
+                        case PacketsSender.SpawnData.SpawnType.VENDOR:
+                            c = CharactersManager.CreateCharacter<Vendor>();
+                            break;
+                        default:
+                            c = CharactersManager.CreateCharacter<Monster>();
+                            break;
+                    }
 
                     c.baseId = baseId;
                     c.Pos = pos;

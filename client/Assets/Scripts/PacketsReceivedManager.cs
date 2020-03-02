@@ -17,6 +17,7 @@ public class PacketsReceivedManager : MonoBehaviour
         { 6, ReceiveAttack },
         { 7, SetPosition },
         { 8, ItemsReceived },
+        { 9, OpenShop },
     };
 
     private delegate void PacketReceivedAction(BinaryReader reader);
@@ -74,31 +75,52 @@ public class PacketsReceivedManager : MonoBehaviour
         {
             ushort slot = reader.ReadUInt16();
             int baseId = reader.ReadInt32();
-            int value1 = reader.ReadInt32();
-            int value2 = reader.ReadInt32();
-
-            Item itemInstance = new Item()
+            if (baseId != -1)
             {
-                baseId = baseId,
-                value1 = value1,
-                value2 = value2
-            };
+                int value1 = reader.ReadInt32();
+                int value2 = reader.ReadInt32();
 
-            UnityMainThreadDispatcher.Instance().Enqueue(() =>
-            {
-                switch (type)
+                Item itemInstance = new Item()
                 {
-                    case RecordType.BACKPACK:
-                        Inventory.Instance.backpack.SetRecord(slot, itemInstance);
-                        break;
-                    case RecordType.EQUIPMENT:
-                        Inventory.Instance.equipment.SetRecord(slot, itemInstance);
-                        break;
-                    case RecordType.WAREHOUSE:
-                        Inventory.Instance.warehouse.SetRecord(slot, itemInstance);
-                        break;
-                }
-            });
+                    baseId = baseId,
+                    value1 = value1,
+                    value2 = value2
+                };
+
+                UnityMainThreadDispatcher.Instance().Enqueue(() =>
+                {
+                    switch (type)
+                    {
+                        case RecordType.BACKPACK:
+                            Inventory.Instance.backpack.SetRecord(slot, itemInstance);
+                            break;
+                        case RecordType.EQUIPMENT:
+                            Inventory.Instance.equipment.SetRecord(slot, itemInstance);
+                            break;
+                        case RecordType.WAREHOUSE:
+                            Inventory.Instance.warehouse.SetRecord(slot, itemInstance);
+                            break;
+                    }
+                });
+            }
+            else
+            {
+                UnityMainThreadDispatcher.Instance().Enqueue(() =>
+                {
+                    switch (type)
+                    {
+                        case RecordType.BACKPACK:
+                            Inventory.Instance.backpack.ClearRecord(slot);
+                            break;
+                        case RecordType.EQUIPMENT:
+                            Inventory.Instance.equipment.ClearRecord(slot);
+                            break;
+                        case RecordType.WAREHOUSE:
+                            Inventory.Instance.warehouse.ClearRecord(slot);
+                            break;
+                    }
+                });
+            }
         }
     }
 
@@ -147,6 +169,31 @@ public class PacketsReceivedManager : MonoBehaviour
         });
     }
 
+    private static void OpenShop(BinaryReader reader)
+    {
+        Dictionary<ushort, VendorWindow.ShopItem> shop = new Dictionary<ushort, VendorWindow.ShopItem>();
+
+        int characterId = reader.ReadInt32();
+        ushort count = reader.ReadUInt16();
+        for (int i = 0; i < count; i++)
+        {
+            shop.Add(reader.ReadUInt16(), new VendorWindow.ShopItem()
+            {
+                itemId = reader.ReadInt32(),
+                price = reader.ReadInt32(),
+                amount = reader.ReadInt32(),
+            });
+        }
+
+        UnityMainThreadDispatcher.Instance().Enqueue(() =>
+        {
+            VendorWindow window = FindObjectOfType<VendorWindow>();
+            window.GetComponent<UIWindow>().Show();
+
+            window.Fill(characterId, shop);
+        });
+    }
+
     private static void SpawnCharacter(BinaryReader reader)
     {
         CharactersManager.SpawnData data = new CharactersManager.SpawnData()
@@ -172,6 +219,9 @@ public class PacketsReceivedManager : MonoBehaviour
                 case CharactersManager.SpawnData.SpawnType.CHARACTER:
                     CharactersManager.Instance.SpawnCharacter<Character>(data);
                     break;
+                default:
+                    CharactersManager.Instance.SpawnCharacter<Character>(data);
+                    break;
             }
         });
     }
@@ -195,6 +245,7 @@ public class PacketsReceivedManager : MonoBehaviour
         ushort dex = reader.ReadUInt16();
         ushort intel = reader.ReadUInt16();
         ushort statPoints = reader.ReadUInt16();
+        uint gold = reader.ReadUInt32();
 
         UnityMainThreadDispatcher.Instance().Enqueue(() =>
         {
@@ -207,6 +258,7 @@ public class PacketsReceivedManager : MonoBehaviour
                 GameCore.Stats.SetProperty<ushort>(id, ObjectStats.DEX, dex);
                 GameCore.Stats.SetProperty<ushort>(id, ObjectStats.INT, intel);
                 GameCore.Stats.SetProperty<ushort>(id, ObjectStats.STATPOINTS, statPoints);
+                GameCore.Stats.SetProperty<uint>(id, ObjectStats.GOLD, gold);
 
                 TestActorController.Instance.SetPlayer(c);
             }

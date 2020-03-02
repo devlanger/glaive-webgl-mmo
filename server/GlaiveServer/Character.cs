@@ -25,7 +25,7 @@ namespace GlaiveServer
             UpdateAttack();
         }
 
-        protected virtual void Die()
+        protected virtual void Die(Character attacker)
         {
             target = null;
         }

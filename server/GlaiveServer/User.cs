@@ -31,12 +31,14 @@ namespace GlaiveServer
             Character.Pos = new Vector2UInt16(250, 205);
             UsersManager.AddUser(id, this);
 
+            CharactersManager.Items.records.Add(Character.id, new RecordsHandler<ushort, Item>());
+
             CharactersManager.Stats.SetProperty<ushort>(Character.id, ObjectStats.STR, 6);
             CharactersManager.Stats.SetProperty<ushort>(Character.id, ObjectStats.INT, 2);
             CharactersManager.Stats.SetProperty<ushort>(Character.id, ObjectStats.VIT, 4);
             CharactersManager.Stats.SetProperty<ushort>(Character.id, ObjectStats.DEX, 3);
 
-            CharactersManager.Stats.SetProperty<int>(Character.id, ObjectStats.RESPAWN_TIME, 3);
+            CharactersManager.Stats.SetProperty<int>(Character.id, ObjectStats.RESPAWN_TIME, 1);
             CharactersManager.Stats.SetProperty<int>(Character.id, ObjectStats.HP, 100);
             CharactersManager.Stats.SetProperty<int>(Character.id, ObjectStats.MAX_HP, 100);
             CharactersManager.Stats.SetProperty<uint>(Character.id, ObjectStats.MAX_EXPERIENCE, 300);
@@ -51,9 +53,16 @@ namespace GlaiveServer
             PacketsSender.ControlCharacter(this, new PacketsSender.ControlData(Character));
 
             Item i = ItemsManager.Instance.CreateItem(3);
-            CharactersManager.Items.records.Add(Character.id, new RecordsHandler<ushort, Item>());
             CharactersManager.Items.GetRecords(Character.id).SetRecord(0, i);
-            PacketsSender.SendItemsList(this, RecordType.BACKPACK, CharactersManager.Items.GetRecords(Character.id).records);
+
+        }
+
+        /// <summary>
+        /// TEMPORARY TO OPTIMIZE
+        /// </summary>
+        public void RefreshItems(RecordType recordType, Dictionary<ushort, Item> items)
+        {
+            PacketsSender.SendItemsList(this, recordType, items);
         }
 
         private void Character_OnAttack(Character target)
@@ -72,6 +81,9 @@ namespace GlaiveServer
             Character.OnUnobserveCharacter += Character_OnUnobserveCharacter;
             Character.OnAttack += Character_OnAttack;
             Character.OnRespawn += Character_OnRespawn;
+
+            CharactersManager.Items.GetRecords(Character.id).OnRecordAdded += User_OnRecordAdded;
+            CharactersManager.Items.GetRecords(Character.id).OnRecordRemoved += User_OnRecordRemoved;
 
             CharactersManager.Stats.RegisterChange(Character.id, ObjectStats.HP, (val) =>
             {
@@ -128,6 +140,29 @@ namespace GlaiveServer
             {
                 byte value = CharactersManager.Stats.GetProperty<byte>(Character.id, ObjectStats.DEAD);
                 PacketsSender.SendStat(this, Character.id, ObjectStats.DEAD, ObjectType.BYTE, value);
+            });
+
+
+            CharactersManager.Stats.RegisterChange(Character.id, ObjectStats.GOLD, (val) =>
+            {
+                uint value = CharactersManager.Stats.GetProperty<uint>(Character.id, ObjectStats.GOLD);
+                PacketsSender.SendStat(this, Character.id, ObjectStats.GOLD, ObjectType.UINT, value);
+            });
+        }
+
+        private void User_OnRecordRemoved(ushort slot)
+        {
+            RefreshItems(RecordType.BACKPACK, new Dictionary<ushort, Item>()
+            {
+                { slot, null }
+            });
+        }
+
+        private void User_OnRecordAdded(ushort slot, Item arg2)
+        {
+            RefreshItems(RecordType.BACKPACK, new Dictionary<ushort, Item>()
+            {
+                { slot, arg2 }
             });
         }
 

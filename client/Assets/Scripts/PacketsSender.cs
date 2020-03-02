@@ -25,9 +25,9 @@ public static class PacketsSender
 
             return writer;
         }
-        #endregion
+    #endregion
 
-        public class MoveData
+    public class MoveData
         {
             public ushort id;
             public ushort posX;
@@ -52,6 +52,66 @@ public static class PacketsSender
 
         write.Write((byte)2);
         write.Write((byte)stat);
+        byte[] d = GetBytes();
+        WebSocketDemo.Instance.SendData(d);
+        Clear(stream);
+    }
+
+
+    public static void InteractWithCharacter(int characterId)
+    {
+        BinaryWriter write = GetWriter();
+
+        write.Write((byte)3);
+        write.Write(characterId);
+        byte[] d = GetBytes();
+        WebSocketDemo.Instance.SendData(d);
+        Clear(stream);
+    }
+
+    public enum ActionType
+    {
+        USE = 1,
+        MOVE = 2,
+        DELETE = 3
+    }
+
+    public static void ItemAction(RecordType recordType, ActionType actionType, ushort slot1, ushort slot2)
+    {
+        BinaryWriter write = GetWriter();
+
+        write.Write((byte)4);
+        write.Write((byte)recordType);
+        write.Write((byte)actionType);
+        switch (actionType)
+        {
+            case ActionType.USE:
+                write.Write(slot1);
+                break;
+            case ActionType.MOVE:
+                write.Write(slot1);
+                write.Write(slot2);
+                break;
+            case ActionType.DELETE:
+                write.Write(slot1);
+                break;
+        }
+
+        byte[] d = GetBytes();
+        WebSocketDemo.Instance.SendData(d);
+        Clear(stream);
+    }
+
+    public static void BuyVendorItem(int characterId, ushort slot)
+    {
+        BinaryWriter write = GetWriter();
+
+        write.Write((byte)4);
+        write.Write((byte)RecordType.VENDOR);
+        write.Write((byte)ActionType.USE);
+        write.Write(slot);
+        write.Write(characterId);
+
         byte[] d = GetBytes();
         WebSocketDemo.Instance.SendData(d);
         Clear(stream);

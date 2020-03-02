@@ -7,6 +7,26 @@ namespace GlaiveServer
     public class RecordsHandler<T, D>
     {
         public Dictionary<T, D> records = new Dictionary<T, D>();
+        public ushort maxSize = 64;
+
+        public event Action<T, D> OnRecordAdded = delegate { };
+        public event Action<T> OnRecordRemoved = delegate { };
+
+        public bool GetFreeSlot(out dynamic id)
+        {
+            for (ushort i = 0; i < maxSize; i++)
+            {
+                dynamic x = i;
+                if (!records.ContainsKey(x))
+                {
+                    id = x;
+                    return true;
+                }
+            }
+
+            id = 0;
+            return false;
+        }
 
         public bool GetRecord(T id, out D val)
         {
@@ -26,17 +46,24 @@ namespace GlaiveServer
             {
                 records.Remove(id);
             }
+
+            OnRecordRemoved(id);
         }
 
         public void SetRecord(T id, D val)
         {
-            if (records.ContainsKey(id))
+            if (val != null)
             {
-                records[id] = val;
-            }
-            else
-            {
-                records.Add(id, val);
+                if (records.ContainsKey(id))
+                {
+                    records[id] = val;
+                }
+                else
+                {
+                    records.Add(id, val);
+                }
+
+                OnRecordAdded(id, val);
             }
         }
 
@@ -47,6 +74,9 @@ namespace GlaiveServer
 
             GetRecord(id, out val1);
             GetRecord(id2, out val2);
+
+            ClearRecord(id);
+            ClearRecord(id2);
 
             SetRecord(id, val2);
             SetRecord(id2, val1);

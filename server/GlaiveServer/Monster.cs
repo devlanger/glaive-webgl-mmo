@@ -7,6 +7,12 @@ namespace GlaiveServer
 {
     public class Monster : Character
     {
+        public override void Interact(User user)
+        {
+            Console.WriteLine("Attack: " + id);
+            user.Character.target = this;
+        }
+
         protected override void Hit(Character attacker, int damage)
         {
             base.Hit(attacker, damage);
@@ -14,7 +20,7 @@ namespace GlaiveServer
             int health = CharactersManager.Stats.GetProperty<int>(id, ObjectStats.HP);
             if (health <= 0)
             {
-                Die();
+                Die(attacker);
             }
             else
             {
@@ -29,15 +35,23 @@ namespace GlaiveServer
             Console.WriteLine(target + " get hit");
         }
 
-        protected override void Die()
+        protected override void Die(Character attacker)
         {
-            base.Die();
+            base.Die(attacker);
+
+            if(attacker != null)
+            {
+                uint gold = CharactersManager.Stats.GetProperty<uint>(attacker.id, ObjectStats.GOLD);
+                CharactersManager.Stats.SetProperty<uint>(attacker.id, ObjectStats.GOLD, gold + 100);
+            }
 
             Drop d = CharactersManager.CreateCharacter<Drop>(new PacketsSender.SpawnData()
             {
                 name = "Drop",
                 pos = Pos
             });
+
+            d.item = ItemsManager.Instance.CreateItem(3);
         }
     }
 }

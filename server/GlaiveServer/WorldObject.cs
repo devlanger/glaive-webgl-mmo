@@ -82,6 +82,11 @@ namespace GlaiveServer
             OnUnobserveCharacter(id);
         }
 
+        public virtual void Interact(User user)
+        {
+
+        }
+
         protected virtual void UpdateObservedCharacters()
         {
             HashSet<int> presentCharactersMap = new HashSet<int>();

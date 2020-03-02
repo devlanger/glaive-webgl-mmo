@@ -11,6 +11,7 @@ namespace GlaiveServer
         {
             DatabaseUtils.Initialize();
             ItemsManager items = new ItemsManager();
+            ShopManager shop = new ShopManager();
             BaseMobsManager mobs = new BaseMobsManager();
             CharacterRespawner respawn = new CharacterRespawner();
             ZonesManager zones = new ZonesManager();

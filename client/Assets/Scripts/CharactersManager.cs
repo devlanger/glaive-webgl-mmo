@@ -66,7 +66,8 @@ public class CharactersManager : Singleton<CharactersManager>
         public enum SpawnType
         {
             CHARACTER = 1,
-            DROP = 2
+            DROP = 2,
+            VENDOR = 3,
         }
     }
 

@@ -13,9 +13,10 @@ public class CharactersManager
 
     private static int id = 1;
 
+
     public static bool GetCharacter<T>(int id, out T c) where T : WorldObject
     {
-        if (characters.ContainsKey(id))
+        if (characters.ContainsKey(id) && characters[id] is T)
         {
             c = characters[id] as T;
             return true;

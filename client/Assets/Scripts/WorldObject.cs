@@ -20,4 +20,9 @@ public class WorldObject : MonoBehaviour
             model.transform.parent = transform;
         }
     }
+
+    public virtual void Interact()
+    {
+        PacketsSender.InteractWithCharacter(Id);
+    }
 }

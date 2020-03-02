@@ -11,15 +11,27 @@ public class ButtonInventory : MonoBehaviour
 
     public Image Icon;
 
-    private void Awake()
+    protected virtual void Awake()
     {
         ItemDragHandler dragHandler = GetComponentInChildren<ItemDragHandler>();
         dragHandler.GetComponent<CanvasGroup>().alpha = 0;
     }
 
-    public void Fill(Item item)
+    public virtual void Fill(Item item)
     {
-        Icon.sprite = item.Base.local.GetIcon();
-        Icon.GetComponent<CanvasGroup>().alpha = 1;
+        if (item != null)
+        {
+            Icon.sprite = item.Base.local.GetIcon();
+            Icon.GetComponent<CanvasGroup>().alpha = 1;
+        }
+        else
+        {
+            Icon.GetComponent<CanvasGroup>().alpha = 0;
+        }
+    }
+
+    public virtual void Click()
+    {
+        PacketsSender.ItemAction(RecordType.BACKPACK, PacketsSender.ActionType.USE, (ushort)Slot, 0);
     }
 }

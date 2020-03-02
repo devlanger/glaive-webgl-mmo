@@ -37,6 +37,7 @@ namespace GlaiveServer
             public ushort intel;
             public ushort dex;
             public ushort statPoints;
+            public uint gold;
 
             public ControlData(WorldObject character)
             {
@@ -47,6 +48,7 @@ namespace GlaiveServer
                 this.intel = CharactersManager.Stats.GetProperty<ushort>(id, ObjectStats.INT);
                 this.dex = CharactersManager.Stats.GetProperty<ushort>(id, ObjectStats.DEX);
                 this.statPoints = CharactersManager.Stats.GetProperty<ushort>(id, ObjectStats.STATPOINTS);
+                this.gold = CharactersManager.Stats.GetProperty<uint>(id, ObjectStats.GOLD);
             }
         }
 
@@ -63,7 +65,8 @@ namespace GlaiveServer
             public enum SpawnType
             {
                 CHARACTER = 1,
-                DROP = 2
+                DROP = 2,
+                VENDOR = 3,
             }
             public SpawnData()
             {
@@ -98,6 +101,7 @@ namespace GlaiveServer
             write.Write(data.dex);
             write.Write(data.intel);
             write.Write(data.statPoints);
+            write.Write(data.gold);
             byte[] d = GetBytes();
             target.SendData(d);
             Clear(stream);
@@ -128,6 +132,26 @@ namespace GlaiveServer
             Clear(stream);
         }
 
+        public static void OpenShop(User target, int shopCharacterId, Dictionary<ushort, Data.ShopItem> data)
+        {
+            BinaryWriter write = GetWriter();
+
+            write.Write((byte)9);
+            write.Write(shopCharacterId);
+            write.Write((ushort)data.Count);
+            foreach (var item in data)
+            {
+                write.Write(item.Key);
+                write.Write(item.Value.itemId);
+                write.Write(item.Value.price);
+                write.Write(item.Value.amount);
+            }
+
+            byte[] d = GetBytes();
+            target.SendData(d);
+            Clear(stream);
+        }
+
         public static void SendItemsList(User target, RecordType type, Dictionary<ushort, Item> items)
         {
             BinaryWriter write = GetWriter();
@@ -138,9 +162,17 @@ namespace GlaiveServer
             foreach (var item in items)
             {
                 write.Write(item.Key);
-                write.Write(item.Value.baseId);
-                write.Write(item.Value.value1);
-                write.Write(item.Value.value2);
+
+                if (item.Value != null)
+                {
+                    write.Write(item.Value.baseId);
+                    write.Write(item.Value.value1);
+                    write.Write(item.Value.value2);
+                }
+                else
+                {
+                    write.Write(-1);
+                }
             }
             byte[] d = GetBytes();
             target.SendData(d);

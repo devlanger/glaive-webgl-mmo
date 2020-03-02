@@ -24,6 +24,7 @@ namespace GameCoreEngine
         EXP_REWARD = 16,
         DEAD = 17,
         RESPAWN_TIME = 18,
+        GOLD = 19,
     }
 
     public enum ObjectType : byte

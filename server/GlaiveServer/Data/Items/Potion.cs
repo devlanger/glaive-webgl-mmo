@@ -8,8 +8,24 @@ namespace GlaiveServer
     {
         public override void Use(ushort slot, Character user)
         {
+            Console.WriteLine("User potion");
+
             int health = CharactersManager.Stats.GetProperty<int>(user.id, GameCoreEngine.ObjectStats.HP);
-            CharactersManager.Stats.SetProperty<int>(user.id, GameCoreEngine.ObjectStats.HP, health + 25);
+            int maxHealth = CharactersManager.Stats.GetProperty<int>(user.id, GameCoreEngine.ObjectStats.MAX_HP);
+
+            if(health == maxHealth)
+            {
+                return;
+            }
+
+            int newHealth = health + 25;
+
+            if (newHealth > maxHealth)
+            {
+                newHealth = maxHealth;
+            }
+
+            CharactersManager.Stats.SetProperty<int>(user.id, GameCoreEngine.ObjectStats.HP, newHealth);
             CharactersManager.Items.GetRecords(user.id).ClearRecord(slot);
         }
     }

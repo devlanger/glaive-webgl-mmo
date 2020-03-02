@@ -12,6 +12,8 @@ public static class PacketsReceivedManager
         { 0, Test },
         { 1, CombatStatePacket },
         { 2, AddStatPacket },
+        { 3, InteractWithCharacter },
+        { 4, ItemActionPacket },
     };
 
     private static void AddStatPacket(User user, BinaryReader reader)
@@ -79,6 +81,79 @@ public static class PacketsReceivedManager
         PacketsSender.Clear(memoryStream);
     }
 
+    private static void InteractWithCharacter(User user, BinaryReader reader)
+    {
+        int characterId = reader.ReadInt32();
+        if(CharactersManager.GetCharacter(characterId, out WorldObject c))
+        {
+            c.Interact(user);
+        }
+    }
+
+    public enum ActionType
+    {
+        USE = 1,
+        MOVE = 2,
+        DELETE = 3
+    }
+
+    private static void ItemActionPacket(User user, BinaryReader reader)
+    {
+        RecordType record = (RecordType)reader.ReadByte();
+        ActionType actionId = (ActionType)reader.ReadByte();
+        ushort slot1;
+        ushort slot2;
+
+        switch (actionId)
+        {
+            case ActionType.USE:
+                slot1 = reader.ReadUInt16();
+                switch (record)
+                {
+                    case RecordType.BACKPACK:
+                        if (CharactersManager.Items.GetRecords(user.Character.id).GetRecord(slot1, out Item item))
+                        {
+                            item.Use(slot1, user.Character);
+                        }
+                        break;
+                    case RecordType.VENDOR:
+                        int vendorId = reader.ReadInt32();
+
+                        if (CharactersManager.GetCharacter(vendorId, out Vendor vendor))
+                        {
+                            vendor.BuyItem(user, slot1);
+                        }
+                        break;
+                }
+                break;
+            case ActionType.MOVE:
+                slot1 = reader.ReadUInt16();
+                slot2 = reader.ReadUInt16();
+                switch (record)
+                {
+                    case RecordType.BACKPACK:
+                        if (CharactersManager.Items.GetRecords(user.Character.id).GetRecord(slot1, out Item item))
+                        {
+                            CharactersManager.Items.GetRecords(user.Character.id).ReplaceRecord(slot1, slot2);
+                        }
+                        break;
+                }
+                break;
+            case ActionType.DELETE:
+                slot1 = reader.ReadUInt16();
+                switch (record)
+                {
+                    case RecordType.BACKPACK:
+                        if (CharactersManager.Items.GetRecords(user.Character.id).GetRecord(slot1, out Item item))
+                        {
+                            CharactersManager.Items.GetRecords(user.Character.id).ClearRecord(slot1);
+                        }
+                        break;
+                }
+                break;
+        }
+    }
+
     private static void Test(User user, BinaryReader reader)
     {
         ushort posX = reader.ReadUInt16();
@@ -113,9 +188,9 @@ public static class PacketsReceivedManager
                 user.Character.target = null;
                 break;
             default:
-                if (CharactersManager.GetCharacter(targetId, out Character target))
+                if (CharactersManager.GetCharacter(targetId, out WorldObject target))
                 {
-                    user.Character.target = target;
+                    target.Interact(user);
                 }
                 break;
         }

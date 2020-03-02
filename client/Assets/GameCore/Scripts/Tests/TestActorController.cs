@@ -37,6 +37,7 @@ namespace GameCoreEngine
                 if (Input.GetMouseButtonDown(0))
                 {
                     Actor a = hit.collider.GetComponent<Actor>();
+                    WorldObject obj = hit.collider.GetComponent<WorldObject>();
 
                     if (hit.collider != null)
                     {
@@ -53,14 +54,20 @@ namespace GameCoreEngine
                         }
                         else
                         {
-                            //targetPoint = hit.point;
-
-                            PacketsSender.MoveToDestination(new PacketsSender.MoveData()
+                            if (obj == null)
                             {
-                                posX = (ushort)hit.point.x,
-                                posY = (ushort)hit.point.z
-                            });
-                            ReleaseTarget();
+                                PacketsSender.MoveToDestination(new PacketsSender.MoveData()
+                                {
+                                    posX = (ushort)hit.point.x,
+                                    posY = (ushort)hit.point.z
+                                });
+                                ReleaseTarget();
+                            }
+                        }
+
+                        if(obj != null)
+                        {
+                            obj.Interact();
                         }
                     }
                     else
@@ -68,8 +75,6 @@ namespace GameCoreEngine
                         ReleaseTarget();
                     }
                 }
-
-
             }
 
             if (interactWithTarget)
